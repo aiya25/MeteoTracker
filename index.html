@@ -40,12 +40,13 @@ header{display:flex;flex-direction:column;gap:2px}
 header .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 h1{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.1;margin:0;letter-spacing:-.02em}
 #where{font-size:14px;color:var(--muted)}
-#who{font-size:13px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:999px;padding:4px 12px}
-#who:empty{display:none}
+#whoSel{font-size:13px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:0;border-radius:999px;padding:6px 12px;width:auto;cursor:pointer}
+#whoSel.hide{display:none}
 h2{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:-.01em;margin:6px 0 -6px;text-wrap:balance}
 .sub{color:var(--muted);font-size:14px}
 button,input,select,textarea{font:inherit;color:inherit}
 .btn{background:var(--accent);color:var(--on);border:0;border-radius:16px;padding:14px 18px;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:default}
 .btn.ghost,:root .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
 .btn.sm{padding:8px 14px;font-size:14px;border-radius:999px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -135,18 +136,46 @@ nav a{flex:1;text-align:center;padding:13px 2px;cursor:pointer;-webkit-tap-highl
 nav a.on{background:var(--ink);color:var(--bg)}
 .view{display:none;flex-direction:column;gap:18px} .view.on{display:flex}
 textarea.out{height:140px;font-size:12px;font-family:ui-monospace,monospace}
-.hide{display:none}
+.hide{display:none !important}
 html.simple .adv{display:none}
 .verdict{font-size:15px;background:rgba(255,255,255,.2);border-radius:999px;padding:6px 14px;align-self:flex-start;margin-bottom:10px}
 .hours{display:flex;gap:6px}
 .hours div{flex:0 0 70px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:16px;background:var(--bg)}
 .hours b{font-family:var(--display);font-weight:500;font-size:18px}
+.ai-out{background:var(--bg);border-radius:16px;padding:14px;font-size:15px;line-height:1.55;white-space:pre-wrap}
+/* Welcome Auth Gate */
+.gate{position:fixed;inset:0;z-index:100;background:var(--bg);overflow-y:auto;padding:24px 16px;display:flex;align-items:center;justify-content:center}
+.gate-box{max-width:420px;width:100%;display:flex;flex-direction:column;gap:16px}
+.gate-hero{background:linear-gradient(160deg,#2f8cff 0%,#5a6bff 60%,#7a5cff 100%);color:#fff;border-radius:28px;padding:24px 20px;box-shadow:var(--shadow)}
+.gate-hero h2{margin:0 0 6px;font-size:24px;color:#fff}
+.gate-hero p{margin:0;font-size:14px;opacity:.88}
 </style>
 </head>
 <body>
+
+<!-- Start Screen Auth Gate -->
+<div class="gate hide" id="authGate">
+  <div class="gate-box">
+    <div class="gate-hero">
+      <h2>Метеотрекер</h2>
+      <p>Дневник давления и самочувствия с погодой, облачной синхронизацией и общим доступом для близких.</p>
+    </div>
+    <div class="card stack">
+      <label for="gEmail">Почта<input id="gEmail" type="email" placeholder="name@example.com" autocomplete="email"></label>
+      <label for="gPass">Пароль (от 6 символов)<input id="gPass" type="password" placeholder="••••••" autocomplete="current-password"></label>
+      <div class="row2">
+        <button class="btn" type="button" id="gSignIn">Войти</button>
+        <button class="btn ghost" type="button" id="gSignUp">Регистрация</button>
+      </div>
+      <div class="sub" id="gMsg"></div>
+    </div>
+    <button class="link" type="button" id="gSkip" style="align-self:center;font-size:14px">Продолжить без входа (только на этом телефоне)</button>
+  </div>
+</div>
+
 <div class="wrap">
   <header>
-    <div class="top"><h1>Метеотрекер</h1><div id="who" class="nt"></div></div>
+    <div class="top"><h1>Метеотрекер</h1><select id="whoSel" class="nt hide" aria-label="Профиль"></select></div>
     <div id="where">Загрузка…</div>
   </header>
   <div class="banner hide" id="demo">Погода и воздух показаны примерные. Живые данные появятся, когда приложение размещено на своём адресе в интернете и есть связь.</div>
@@ -232,6 +261,17 @@ html.simple .adv{display:none}
 
   <section class="view" id="v-reports">
     <div class="banner hide ex">Пока записей нет. Отчёты построены на примерах.</div>
+    <h2>ИИ-помощник</h2>
+    <div class="card stack">
+      <div class="sub">ИИ проанализирует ваши записи за последние 28 дней, найдёт связи с погодой и сном и подготовит вопросы для врача.</div>
+      <div class="row2">
+        <button class="btn" type="button" id="aiRun">Анализ ИИ</button>
+        <button class="btn ghost" type="button" id="aiCopyPrompt">Спросить ИИ (копия)</button>
+      </div>
+      <div class="ai-out hide nt" id="aiOut"></div>
+      <textarea class="out hide" id="aiPromptOut" readonly aria-label="Сводка для ИИ"></textarea>
+    </div>
+
     <h2>Сводка за 7 дней</h2>
     <div class="grid" id="week"></div>
     <h2>Закономерности</h2>
@@ -440,7 +480,8 @@ const TR=[
 ["Сон в среднем","Average sleep","Орташа ұйқы"],["ночей:","nights:","түн:"],["Kp-индекс","Kp index","Kp индексі"],
 ["Метеотрекер","Meteotracker",""],["Записей пока нет. Сделайте первую на вкладке «Запись».","No entries yet. Make the first one on the Entry tab.","Әзірге жазба жоқ. Алғашқысын «Жазба» қойындысында жасаңыз."],["пн","Mon","дс"],["вт","Tue","сс"],["ср","Wed","ср"],["чт","Thu","бс"],["пт","Fri","жм"],["сб","Sat","сн"],["вс","Sun","жс"],
 ["Астана","Astana",""],["Алматы","Almaty",""],["Шымкент","Shymkent",""],["Караганда","Karaganda","Қарағанды"],["Актобе","Aktobe","Ақтөбе"],["Тараз","Taraz",""],["Павлодар","Pavlodar",""],["Усть-Каменогорск","Oskemen","Өскемен"],["Семей","Semey",""],["Атырау","Atyrau",""],["Костанай","Kostanay","Қостанай"],["Кызылорда","Kyzylorda","Қызылорда"],["Уральск","Oral","Орал"],["Петропавловск","Petropavl","Петропавл"],["Актау","Aktau","Ақтау"],["Темиртау","Temirtau","Теміртау"],["Туркестан","Turkistan","Түркістан"],["Кокшетау","Kokshetau","Көкшетау"],["Талдыкорган","Taldykorgan","Талдықорған"],["Экибастуз","Ekibastuz","Екібастұз"],["Москва","Moscow","Мәскеу"],["Санкт-Петербург","Saint Petersburg",""],["Ташкент","Tashkent",""],["Бишкек","Bishkek","Бішкек"],
-["Облако и вход","Cloud & Sign in","Бұлт және кіру"],["Почта","Email","Пошта"],["Пароль (от 6 символов)","Password (min 6 chars)","Құпиясөз (кемінде 6 таңба)"],["Войти","Sign in","Кіру"],["Создать аккаунт","Create account","Тіркелу"],["Обновить","Sync now","Жаңарту"],["Выйти из аккаунта","Sign out","Шығу"],["Открыть доступ","Share","Рұқсат беру"],["Почта родного человека","Family member's email","Жақын адамның поштасы"]
+["Облако и вход","Cloud & Sign in","Бұлт және кіру"],["Почта","Email","Пошта"],["Пароль (от 6 символов)","Password (min 6 chars)","Құпиясөз (кемінде 6 таңба)"],["Войти","Sign in","Кіру"],["Создать аккаунт","Create account","Тіркелу"],["Регистрация","Sign up","Тіркелу"],["Обновить","Sync now","Жаңарту"],["Выйти из аккаунта","Sign out","Шығу"],["Открыть доступ","Share","Рұқсат беру"],["Почта родного человека","Family member's email","Жақын адамның поштасы"],
+["ИИ-помощник","AI Assistant","ЖИ-көмекші"],["Анализ ИИ","AI Analysis","ЖИ талдауы"],["Спросить ИИ (копия)","Ask AI (copy)","ЖИ-ден сұрау (көшіру)"]
 ];
 const LANG=["ru","kk","en"].includes(S.lang)?S.lang:"ru", LOC={ru:"ru-RU",kk:"ru-RU",en:"en-GB"}[LANG];
 const KM=["қаңтар","ақпан","наурыз","сәуір","мамыр","маусым","шілде","тамыз","қыркүйек","қазан","қараша","желтоқсан"],KW=["жс","дс","сс","ср","бс","жм","сн"];
@@ -484,7 +525,6 @@ async function syncFromCloud(){
   if(!sb||!sbUser)return;
   setSyncStatus("Синхронизация…");
   try{
-    // 1. Ensure local profiles are pushed if they don't have cloud UUID yet
     const isUuid=v=>typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(v);
     for(const p of S.profiles){
       if(!isUuid(p.id)){
@@ -502,7 +542,6 @@ async function syncFromCloud(){
     }
     saveS();saveE();
 
-    // 2. Fetch all accessible profiles (owned + shared)
     const {data:cloudProfs,error:pErr}=await sb.from("mt_profiles").select("*").order("created_at",{ascending:true});
     if(pErr)throw pErr;
 
@@ -519,7 +558,6 @@ async function syncFromCloud(){
       saveS();
     }
 
-    // 3. Push any local entries that aren't in cloud yet
     const validPids=new Set(S.profiles.map(p=>String(p.id)));
     const localToPush=ALL.filter(e=>validPids.has(String(e.pid))&&!e._synced);
     if(localToPush.length){
@@ -532,7 +570,6 @@ async function syncFromCloud(){
       if(!upErr)localToPush.forEach(e=>e._synced=true);
     }
 
-    // 4. Fetch all entries for accessible profiles
     const {data:cloudEntries,error:eErr}=await sb.from("mt_entries").select("*").order("ts",{ascending:true});
     if(eErr)throw eErr;
     if(cloudEntries){
@@ -540,7 +577,6 @@ async function syncFromCloud(){
       saveE();
     }
 
-    // 5. Fetch shares for owned profiles
     const {data:shData}=await sb.from("mt_shares").select("*");
     sbShares=shData||[];
 
@@ -775,8 +811,68 @@ function renderHistory(){
       ${e.ex?"":`<button type="button" class="link" data-del="${e.ts}">Удалить</button>`}</div>`}).join("");
 }
 
-/* ---------- Reports ---------- */
+/* ---------- Reports & AI Assistant ---------- */
 function doctorRows(){return data().filter(e=>e.sys&&e.dia&&e.ts>Date.now()-28*DAY)}
+function buildAiSummary(){
+  const p=prof(),list=data().filter(e=>e.ts>Date.now()-28*DAY);
+  if(!list.length)return null;
+  const lines=[`Профиль: ${p.rawName||p.name}, город: ${p.city.name}. Записей за 28 дней: ${list.length}.`];
+  if(p.meds&&p.meds.length)lines.push("Список лекарств: "+p.meds.map(m=>`${m.name} (${m.time})`).join(", "));
+  lines.push("\nЗаписи (дата, время суток, давление, пульс, самочувствие/10, головная боль/10, сон, симптомы, среда):");
+  list.slice(-45).forEach(e=>{
+    const v=e.env||{},parts=[new Date(e.ts).toLocaleDateString("ru-RU"),e.tod||""];
+    if(e.sys&&e.dia)parts.push(`АД ${e.sys}/${e.dia}`);
+    if(e.pulse)parts.push(`пульс ${e.pulse}`);
+    if(e.mood!=null)parts.push(`самочувствие ${e.mood}/10`);
+    if(e.head)parts.push(`головная боль ${e.head}/10`);
+    if(e.sleep)parts.push(`сон ${e.sleep}ч`+(e.sq?` (качество ${e.sq}/5)`:""));
+    if(e.sym&&e.sym.length)parts.push(`симптомы: ${e.sym.join(",")}`);
+    if(e.hab&&e.hab.length)parts.push(`факторы: ${e.hab.join(",")}`);
+    if(e.meds&&e.meds.total)parts.push(`лекарства ${e.meds.taken.length}/${e.meds.total}`);
+    const envP=[];
+    if(v.p)envP.push(`атм.давл ${Math.round(v.p*HPA2MM)}мм`);
+    if(v.dp24!=null)envP.push(`перепад 24ч ${(v.dp24*HPA2MM).toFixed(1)}мм`);
+    if(v.t!=null)envP.push(`t ${Math.round(v.t)}°`);
+    if(v.pm25!=null)envP.push(`PM2.5 ${Math.round(v.pm25)}`);
+    if(v.kp!=null)envP.push(`Kp ${v.kp.toFixed(1)}`);
+    if(envP.length)parts.push("["+envP.join(", ")+"]");
+    if(e.note)parts.push(`заметка: ${e.note}`);
+    lines.push("- "+parts.join(" | "));
+  });
+  return lines.join("\n");
+}
+
+$("aiRun").addEventListener("click",async()=>{
+  const summary=buildAiSummary();
+  const out=$("aiOut"),btn=$("aiRun");
+  out.classList.remove("hide");
+  if(!summary){out.textContent="Сначала сделайте хотя бы одну-две записи на вкладке «Запись», чтобы ИИ было что анализировать.";return}
+  if(!sb){out.textContent="Нет подключения к серверу.";return}
+  btn.disabled=true;
+  out.textContent="Анализирую дневник…";
+  try{
+    const {data,error}=await sb.functions.invoke("ai-analyze",{body:{summary,lang:LANG}});
+    if(error)throw error;
+    if(data&&data.error)throw new Error(data.error);
+    out.textContent=(data&&data.text)||"Не удалось получить ответ.";
+  }catch(err){
+    out.textContent="Не удалось получить ответ ИИ: "+(err.message||"проверьте соединение или баланс OpenAI.");
+  }finally{
+    btn.disabled=false;
+  }
+});
+
+$("aiCopyPrompt").addEventListener("click",()=>{
+  const summary=buildAiSummary();
+  if(!summary){
+    $("aiOut").classList.remove("hide");
+    $("aiOut").textContent="Пока нет записей для сводки.";
+    return;
+  }
+  const prompt="Проанализируй мой дневник давления, самочувствия и погоды за последние 28 дней. Выдели 3–4 закономерности по цифрам и составь список вопросов для моего лечащего врача (без постановки диагнозов и назначения лечения):\n\n"+summary;
+  copyOut(prompt,$("aiPromptOut"),$("aiCopyPrompt"));
+});
+
 function renderReports(){
   const list=data(),wk=list.filter(e=>e.ts>Date.now()-7*DAY),bp=wk.filter(e=>e.sys&&e.dia);
   const worst=bp.slice().sort((a,b)=>b.sys-a.sys)[0],md=wk.filter(e=>e.meds&&e.meds.total);
@@ -848,6 +944,7 @@ function renderAuth(){
   $("authLoggedOut").classList.toggle("hide",loggedIn);
   $("authLoggedIn").classList.toggle("hide",!loggedIn);
   if(loggedIn){
+    $("authGate").classList.add("hide");
     $("userEmail").textContent=sbUser.email||"";
     const p=prof();
     const isOwner=!p.owner_id||p.owner_id===sbUser.id;
@@ -860,32 +957,31 @@ function renderAuth(){
   }
 }
 
-$("btnSignIn").addEventListener("click",async()=>{
+async function doAuth(mode,email,password,msgEl){
   if(!sb)return;
-  const email=$("authEmail").value.trim(),password=$("authPass").value;
-  if(!email||!password){$("authMsg").textContent="Введите почту и пароль.";return}
-  $("authMsg").textContent="Вхожу…";
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error){$("authMsg").textContent="Ошибка входа: "+error.message;return}
-  $("authMsg").textContent="";
-  sbUser=data.user;renderAuth();await syncFromCloud();
-});
+  if(!email||password.length<6){msgEl.textContent="Укажите почту и пароль (от 6 символов).";return}
+  msgEl.textContent=mode==="in"?"Вхожу…":"Создаю аккаунт…";
+  const res=mode==="in"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});
+  if(res.error){msgEl.textContent="Ошибка: "+res.error.message;return}
+  msgEl.textContent="";
+  sbUser=res.data.user;
+  S.skipGate=false;saveS();
+  renderAuth();
+  await syncFromCloud();
+}
 
-$("btnSignUp").addEventListener("click",async()=>{
-  if(!sb)return;
-  const email=$("authEmail").value.trim(),password=$("authPass").value;
-  if(!email||password.length<6){$("authMsg").textContent="Укажите почту и пароль не короче 6 символов.";return}
-  $("authMsg").textContent="Создаю аккаунт…";
-  const {data,error}=await sb.auth.signUp({email,password});
-  if(error){$("authMsg").textContent="Ошибка регистрации: "+error.message;return}
-  $("authMsg").textContent="";
-  sbUser=data.user;renderAuth();await syncFromCloud();
-});
+$("gSignIn").addEventListener("click",()=>doAuth("in",$("gEmail").value.trim(),$("gPass").value,$("gMsg")));
+$("gSignUp").addEventListener("click",()=>doAuth("up",$("gEmail").value.trim(),$("gPass").value,$("gMsg")));
+$("gSkip").addEventListener("click",()=>{S.skipGate=true;saveS();$("authGate").classList.add("hide")});
+
+$("btnSignIn").addEventListener("click",()=>doAuth("in",$("authEmail").value.trim(),$("authPass").value,$("authMsg")));
+$("btnSignUp").addEventListener("click",()=>doAuth("up",$("authEmail").value.trim(),$("authPass").value,$("authMsg")));
 
 $("btnSignOut").addEventListener("click",async()=>{
   if(!sb)return;
   await sb.auth.signOut();
-  sbUser=null;sbShares=[];renderAuth();
+  sbUser=null;sbShares=[];S.skipGate=false;saveS();renderAuth();
+  $("authGate").classList.remove("hide");
 });
 
 $("btnSyncNow").addEventListener("click",()=>syncFromCloud());
@@ -912,8 +1008,10 @@ $("shareList").addEventListener("click",async ev=>{
 const CITIES=[["Астана",51.1801,71.446],["Алматы",43.2567,76.9286],["Шымкент",42.3,69.6],["Караганда",49.8047,73.1094],["Актобе",50.2839,57.167],["Тараз",42.9,71.3667],["Павлодар",52.2873,76.9674],["Усть-Каменогорск",49.9483,82.6275],["Семей",50.4111,80.2275],["Атырау",47.1167,51.8833],["Костанай",53.2144,63.6246],["Кызылорда",44.8528,65.5092],["Уральск",51.2333,51.3667],["Петропавловск",54.8753,69.1628],["Актау",43.65,51.1667],["Темиртау",50.0549,72.9646],["Туркестан",43.2973,68.2518],["Кокшетау",53.2833,69.3833],["Талдыкорган",45.0167,78.3667],["Экибастуз",51.7298,75.3266],["Москва",55.7558,37.6173],["Санкт-Петербург",59.9343,30.3351],["Ташкент",41.2995,69.2401],["Бишкек",42.8746,74.5698]];
 function renderMore(){
   const p=prof();
-  $("who").textContent=S.profiles.length>1?p.name:"";
-  $("profSel").innerHTML=S.profiles.map(x=>`<option value="${x.id}"${String(x.id)===String(p.id)?" selected":""}>${esc(x.name)}</option>`).join("");
+  const opts=S.profiles.map(x=>`<option value="${x.id}"${String(x.id)===String(p.id)?" selected":""}>${esc(x.name)}</option>`).join("");
+  $("whoSel").innerHTML=opts;
+  $("whoSel").classList.toggle("hide",S.profiles.length<=1);
+  $("profSel").innerHTML=opts;
   $("cityList").innerHTML=(CITIES.some(c=>c[0]===p.city.name)?"":`<option value="-1" selected>${esc(p.city.name)}</option>`)+CITIES.map((c,i)=>`<option value="${i}"${c[0]===p.city.name?" selected":""}>${c[0]}</option>`).join("");
   $("medList").innerHTML=p.meds.length?p.meds.map((m,i)=>`<div class="day"><span><span class="nt">${esc(m.name)}</span> <span class="meta">· ${m.time}</span></span><button type="button" class="link" data-med="${i}">Убрать</button></div>`).join(""):`<div class="sub">Лекарств в списке нет.</div>`;
   $("big").checked=!!S.big;$("theme").value=S.theme||"auto";$("lang").value=LANG;
@@ -925,7 +1023,8 @@ function applyLook(){
   $("simpleBtn").textContent=simple?"Показать все поля":"Оставить только главное";
   if(S.theme==="light"||S.theme==="dark")document.documentElement.dataset.theme=S.theme;
 }
-function switched(){saveS();renderMore();renderForm();renderHistory();renderReports();load()}
+function switched(){saveS();$("aiOut").classList.add("hide");renderMore();renderForm();renderHistory();renderReports();load()}
+$("whoSel").addEventListener("change",()=>{S.cur=$("whoSel").value;switched()});
 $("profSel").addEventListener("change",()=>{S.cur=$("profSel").value;switched()});
 $("profAdd").addEventListener("click",async()=>{
   const n=$("profNew").value.trim();if(!n)return;
@@ -978,7 +1077,7 @@ if(trMap&&document.body){document.documentElement.lang=LANG;tr(document.body);
   new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(tr))).observe(document.body,{childList:true,subtree:true})}
 load();setInterval(load,30*60*1000);
 
-/* ---------- Check existing Supabase session ---------- */
+/* ---------- Check existing Supabase session & Start Gate ---------- */
 (async()=>{
   if(!sb)return;
   const {data}=await sb.auth.getSession();
@@ -986,6 +1085,8 @@ load();setInterval(load,30*60*1000);
     sbUser=data.session.user;
     renderAuth();
     await syncFromCloud();
+  }else if(!S.skipGate){
+    $("authGate").classList.remove("hide");
   }
 })();
 
