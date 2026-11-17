@@ -161,6 +161,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 /* Wellbeing background fills */
 .cal .ok{background:var(--ok);color:#fff} .cal .warn{background:var(--warn);color:#fff} .cal .bad{background:var(--bad);color:#fff}
 .cal .today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.cal .sel-day{transform:scale(1.06);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent);z-index:2}
+.day-detail-box{background:var(--bg);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;margin-top:4px}
 /* Distinct Flo / Eva Cycle Badges & Icons on Calendar so they NEVER clash with Wellbeing */
 .cal .period::after{content:"🩸";position:absolute;bottom:1px;right:2px;font-size:9px;line-height:1}
 .cal .period:not(.ok):not(.warn):not(.bad){background:color-mix(in srgb,var(--rose) 15%,var(--bg));color:var(--rose)}
@@ -468,6 +470,8 @@ html.simple .adv{display:none}
         <span id="calCycleLegend" class="hide"><span style="font-size:12px;margin-right:3px">🩸</span>месячные</span>
         <span id="calOvulLegend" class="hide"><span style="color:var(--ovul);font-weight:700;margin-right:3px">✦</span>овуляция</span>
       </div>
+      <div class="sub" id="calTapHint">Нажмите на любой день в календаре, чтобы посмотреть замеры, самочувствие и погоду за эту дату.</div>
+      <div id="calDayDetail" class="hide"></div>
     </div>
 
     <details class="fold">
@@ -1497,7 +1501,7 @@ function renderHistory(){
     for(let i=0;i<dur;i++)predSet.add(isoDate(base+i*DAY));
   }
 
-  $("cal").classList.toggle("clickable",isFem);
+  $("cal").classList.add("clickable");
   for(let d=1;d<=nd;d++){
     const k=y+"-"+(m+1)+"-"+d;
     const iso=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
@@ -1506,9 +1510,11 @@ function renderHistory(){
     const isPred=!isPer&&predSet.has(iso);
     const isOvul=isFem&&ci&&ci.ovulIso===iso;
     const isFert=isFem&&ci&&ci.fertStartIso&&ci.fertEndIso&&iso>=ci.fertStartIso&&iso<=ci.fertEndIso;
-    c+=`<div ${isFem?`data-iso="${iso}"`:""} class="${s||""}${k===tk?" today":""}${isPer?" period":""}${isPred?" pred-period":""}${isFert?" fertile":""}${isOvul?" ovul":""}">${d}</div>`;
+    const isSel=selectedCalIso===iso;
+    c+=`<div data-iso="${iso}" class="${s||""}${k===tk?" today":""}${isPer?" period":""}${isPred?" pred-period":""}${isFert?" fertile":""}${isOvul?" ovul":""}${isSel?" sel-day":""}">${d}</div>`;
   }
   $("cal").innerHTML=c;
+  renderDayDetail();
   $("list").innerHTML=!list.length?`<div class="sub">Записей пока нет. Сделайте первую на вкладке «Запись».</div>`:list.slice().reverse().slice(0,60).map(e=>{
     const dt=dstr(e.ts,"dt"),v=e.env||{},m=[],en=[];
     if(e.tod)m.push(e.tod);if(e.pulse)m.push("пульс "+e.pulse);if(e.head)m.push("голова "+e.head+"/10");if(e.mood!=null)m.push("самочувствие "+e.mood+"/10");
@@ -1524,10 +1530,85 @@ function renderHistory(){
       <button type="button" class="link" data-del="${e.ts}">Удалить</button></div>`}).join("");
 }
 
+let selectedCalIso=null;
+
+function renderDayDetail(){
+  const box=$("calDayDetail"), hint=$("calTapHint");
+  if(!selectedCalIso){
+    box.classList.add("hide");
+    if(hint)hint.classList.remove("hide");
+    return;
+  }
+  if(hint)hint.classList.add("hide");
+  box.classList.remove("hide");
+  const p=prof(), isFem=p&&p.sex==="f";
+  const targetTs=Date.parse(selectedCalIso+"T12:00:00");
+  const dayTitle=dstr(targetTs,"wd");
+  const dayEntries=data().filter(e=>isoDate(e.ts)===selectedCalIso);
+
+  let cycleLine="";
+  if(isFem){
+    const ci=getCycleInfo(p,targetTs);
+    const pDates=Array.isArray(p.periodDates)?p.periodDates:[];
+    const isPer=pDates.includes(selectedCalIso);
+    const badges=[];
+    if(ci&&ci.day)badges.push(`${ci.day}-й день цикла (${ci.phase})`);
+    if(isPer)badges.push("🩸 день месячных");
+    if(ci&&ci.ovulIso===selectedCalIso)badges.push("✦ расчётная овуляция");
+    if(badges.length)cycleLine=`<div class="meta" style="color:var(--rose);font-weight:500">${badges.join(" · ")}</div>`;
+  }
+
+  let bodyHtml="";
+  if(!dayEntries.length){
+    bodyHtml=`<div class="sub">Записей давления и самочувствия за этот день нет.</div>`;
+  }else{
+    bodyHtml=dayEntries.map(e=>{
+      const tStr=new Date(e.ts).toLocaleTimeString(LOC,{hour:"2-digit",minute:"2-digit"});
+      const v=e.env||{}, parts=[];
+      if(e.tod)parts.push(e.tod);
+      if(e.sys&&e.dia)parts.push(`<b>АД ${e.sys}/${e.dia}</b>`);
+      if(e.pulse)parts.push(`пульс ${e.pulse}`);
+      if(e.mood!=null)parts.push(`самочувствие ${e.mood}/10`);
+      if(e.head)parts.push(`голова ${e.head}/10`);
+      if(e.flow)parts.push(`выделения: ${e.flow}`);
+      if(e.bbt)parts.push(`БТ ${fmt(e.bbt,2)}°`);
+      if(e.sleep)parts.push(`сон ${fmt(+e.sleep,1)} ч`);
+      if(e.meds&&e.meds.total)parts.push(`лекарства ${e.meds.taken.length}/${e.meds.total}`);
+      const tags=[...(e.sym||[]),...(e.femSym||[]),...(e.hab||[])];
+      const envArr=[];
+      if(v.p)envArr.push(`${fmt(v.p*HPA2MM)} мм`);
+      if(v.dp24!=null)envArr.push(`перепад ${sign(v.dp24*HPA2MM)}`);
+      if(v.t!=null)envArr.push(`${fmt(v.t)}°`);
+      if(v.pm25!=null)envArr.push(`PM2.5 ${fmt(v.pm25)}`);
+      if(v.kp!=null)envArr.push(`Kp ${fmt(v.kp,1)}`);
+      return `<div style="border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:2px">
+        <div class="rowx" style="justify-content:space-between"><span style="font-size:14px">${parts.join(" · ")||"Быстрая отметка"}</span><span class="meta">${tStr}</span></div>
+        ${tags.length?`<div class="meta">Симптомы/факторы: ${esc(tags.join(", "))}</div>`:""}
+        ${envArr.length?`<div class="meta">Погода: ${envArr.join(" · ")}</div>`:""}
+        ${e.note?`<div class="nt" style="font-size:13.5px">${esc(e.note)}</div>`:""}
+      </div>`;
+    }).join("");
+  }
+
+  box.innerHTML=`<div class="day-detail-box">
+    <div class="rowx" style="justify-content:space-between">
+      <b>${dayTitle}</b>
+      <button type="button" class="link" id="closeDayDetail">Скрыть</button>
+    </div>
+    ${cycleLine}
+    ${bodyHtml}
+    ${isFem?`<button type="button" class="link" id="editCycleFromDay" style="color:var(--rose);margin-top:2px">Изменить отметку месячных в календаре Flo →</button>`:""}
+  </div>`;
+  $("closeDayDetail").onclick=()=>{selectedCalIso=null;renderHistory()};
+  const editBtn=$("editCycleFromDay");
+  if(editBtn)editBtn.onclick=()=>openFloModal(targetTs);
+}
+
 $("cal").addEventListener("click",ev=>{
   const cell=ev.target.closest("[data-iso]");
   if(!cell)return;
-  togglePeriodDate(cell.dataset.iso);
+  selectedCalIso=selectedCalIso===cell.dataset.iso?null:cell.dataset.iso;
+  renderHistory();
 });
 
 /* ---------- Reports & PDF Print ---------- */
