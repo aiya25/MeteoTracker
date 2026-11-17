@@ -153,21 +153,39 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .results{display:flex;flex-direction:column;gap:6px}
 .results button{text-align:left;background:var(--bg);border:0;border-radius:14px;padding:12px;cursor:pointer}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:12px;background:var(--bg);font-variant-numeric:tabular-nums;position:relative;user-select:none}
+.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;border-radius:14px;background:var(--bg);font-variant-numeric:tabular-nums;position:relative;user-select:none}
 .cal.clickable div[data-iso]{cursor:pointer}
 .cal.clickable div[data-iso]:active{transform:scale(.92)}
-.cal .h{background:none;color:var(--muted);font-size:12px;aspect-ratio:auto;padding:2px 0}
+.cal .h{background:none;color:var(--muted);font-size:12px;aspect-ratio:auto;padding:2px 0;font-weight:500}
 .cal .e{background:none}
+/* Wellbeing background fills */
 .cal .ok{background:var(--ok);color:#fff} .cal .warn{background:var(--warn);color:#fff} .cal .bad{background:var(--bad);color:#fff}
-.cal .today{outline:2px solid var(--ink);outline-offset:1px}
-/* Flo / Eva Cycle Indicators on Calendar */
-.cal .period::after{content:"";position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--rose)}
-.cal .ok.period::after,.cal .warn.period::after,.cal .bad.period::after{background:#fff}
+.cal .today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+/* Distinct Flo / Eva Cycle Badges & Icons on Calendar so they NEVER clash with Wellbeing */
+.cal .period::after{content:"🩸";position:absolute;bottom:1px;right:2px;font-size:9px;line-height:1}
+.cal .period:not(.ok):not(.warn):not(.bad){background:color-mix(in srgb,var(--rose) 15%,var(--bg));color:var(--rose)}
 .cal .pred-period{outline:1.5px dashed var(--rose);outline-offset:-2px}
-.cal .fertile{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ovul) 55%,transparent)}
-.cal .ovul::before{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--ovul)}
-.cal .ok.ovul::before,.cal .warn.ovul::before,.cal .bad.ovul::before{background:#fff}
+.cal .fertile{border-bottom:3px solid var(--ovul)}
+.cal .ovul::before{content:"✦";position:absolute;top:1px;left:3px;font-size:9px;line-height:1;color:var(--ovul)}
+.cal .ok.ovul::before,.cal .warn.ovul::before,.cal .bad.ovul::before{color:#fff}
 #calT{font-family:var(--display);font-weight:600;font-size:17px}
+
+/* Flo-style Cycle Log Modal & Interactive Calendar */
+.flo-modal{position:fixed;inset:0;z-index:120;background:rgba(12,14,20,.48);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.flo-sheet{background:var(--surface);width:100%;max-width:480px;border-radius:28px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:14px;max-height:88vh;overflow-y:auto}
+.flo-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.flo-cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;border-radius:50%;background:var(--bg);cursor:pointer;position:relative;user-select:none;transition:transform .1s,background .15s}
+.flo-cal div:active{transform:scale(.9)}
+.flo-cal .h{background:none;color:var(--muted);font-size:12px;aspect-ratio:auto;padding:2px 0;cursor:default}
+.flo-cal .e{background:none;cursor:default}
+.flo-cal .p-on{background:var(--rose);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--rose) 35%,transparent)}
+.flo-cal .p-pred{outline:1.5px dashed var(--rose);outline-offset:-2px;color:var(--rose)}
+.flo-cal .p-fert{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ovul) 55%,transparent)}
+.flo-cal .p-ovul::before{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--ovul)}
+.flo-cal .today{outline:2px solid var(--ink);outline-offset:1px}
+.flo-cal .future{opacity:.45}
+.flo-fab{background:var(--rose);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 14px color-mix(in srgb,var(--rose) 30%,transparent)}
+.flo-fab:active{transform:scale(.96)}
 
 /* Tables & Lists */
 .scroll{overflow-x:auto}
@@ -304,6 +322,34 @@ html.simple .adv{display:none}
   </div>
 </div>
 
+<!-- Flo-Style Cycle Calendar Modal -->
+<div class="flo-modal hide" id="floModal">
+  <div class="flo-sheet">
+    <div class="rowx" style="justify-content:space-between">
+      <div>
+        <h2 style="margin:0;font-size:20px">Отметить месячные</h2>
+        <div class="meta">Нажимайте на дни в календаре — как в Flo</div>
+      </div>
+      <button type="button" class="btn sm ghost" id="floDoneBtn">Готово</button>
+    </div>
+    <div class="rowx" style="justify-content:space-between;background:var(--bg);padding:6px 10px;border-radius:16px">
+      <button type="button" class="btn sm ghost" id="floPrevM">←</button>
+      <b id="floCalTitle" style="font-family:var(--display);font-size:16px"></b>
+      <button type="button" class="btn sm ghost" id="floNextM">→</button>
+    </div>
+    <div class="flo-cal" id="floCalGrid"></div>
+    <div class="legend" style="justify-content:center">
+      <span><i style="background:var(--rose)"></i>месячные</span>
+      <span><i style="background:transparent;border:1.5px dashed var(--rose)"></i>прогноз</span>
+      <span><i style="background:var(--ovul)"></i>овуляция</span>
+    </div>
+    <div class="row2" style="border-top:1px solid var(--line);padding-top:12px">
+      <button type="button" class="btn sm ghost" id="floQuickToday" style="color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)">Начались сегодня (5 дн.)</button>
+      <button type="button" class="btn sm ghost" id="floQuickYesterday" style="color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)">Начались вчера (5 дн.)</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
   <header>
     <div class="top">
@@ -415,12 +461,12 @@ html.simple .adv{display:none}
     <div class="card stack">
       <div class="rowx" style="justify-content:space-between"><button class="btn ghost sm" type="button" id="calPrev">Раньше</button><b id="calT"></b><button class="btn ghost sm" type="button" id="calNext">Позже</button></div>
       <div class="cal" id="cal"></div>
-      <div class="legend">
-        <span><i style="background:var(--ok)"></i>хороший</span>
+      <div class="legend" style="gap:10px 14px">
+        <span><i style="background:var(--ok)"></i>хороший день</span>
         <span><i style="background:var(--warn)"></i>средний</span>
         <span><i style="background:var(--bad)"></i>плохой</span>
-        <span id="calCycleLegend" class="hide"><i style="background:var(--rose)"></i>месячные</span>
-        <span id="calOvulLegend" class="hide"><i style="background:var(--ovul)"></i>овуляция / фертильные</span>
+        <span id="calCycleLegend" class="hide"><span style="font-size:12px;margin-right:3px">🩸</span>месячные</span>
+        <span id="calOvulLegend" class="hide"><span style="color:var(--ovul);font-weight:700;margin-right:3px">✦</span>овуляция</span>
       </div>
     </div>
 
@@ -859,6 +905,64 @@ function getCycleInfo(p, targetTs=Date.now()){
   return {day:cycleDay,phase,guideKey,isPeriodToday,isOvulToday,isFertileToday,chance,len,nextIn,nextIso,ovulDay,ovulIso,fertStartIso,fertEndIso,startIso,hist};
 }
 
+let floM=new Date();
+
+function openFloModal(baseDate){
+  floM=baseDate?new Date(baseDate):new Date();
+  renderFloModal();
+  $("floModal").classList.remove("hide");
+}
+function closeFloModal(){
+  $("floModal").classList.add("hide");
+}
+
+function renderFloModal(){
+  const p=prof();
+  if(!p||p.sex!=="f")return;
+  const y=floM.getFullYear(),m=floM.getMonth();
+  const first=new Date(y,m,1),nd=new Date(y,m+1,0).getDate(),off=(first.getDay()+6)%7;
+  $("floCalTitle").textContent=dstr(first,"month");
+  const tk=isoDate(Date.now());
+  const pDates=Array.isArray(p.periodDates)?p.periodDates:[];
+  const ci=getCycleInfo(p);
+  const predSet=new Set();
+  if(ci&&ci.nextIso){
+    const base=Date.parse(ci.nextIso+"T12:00:00");
+    const dur=ci.hist?ci.hist.avgDuration:(Number(p.periodDur)||5);
+    for(let i=0;i<dur;i++)predSet.add(isoDate(base+i*DAY));
+  }
+  let html=["пн","вт","ср","чт","пт","сб","вс"].map(d=>`<div class="h">${d}</div>`).join("")+`<div class="e"></div>`.repeat(off);
+  for(let d=1;d<=nd;d++){
+    const iso=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const isOn=pDates.includes(iso);
+    const isPred=!isOn&&predSet.has(iso);
+    const isOvul=ci&&ci.ovulIso===iso;
+    const isFert=ci&&ci.fertStartIso&&ci.fertEndIso&&iso>=ci.fertStartIso&&iso<=ci.fertEndIso;
+    const isFuture=iso>tk;
+    html+=`<div data-fiso="${iso}" class="${isOn?"p-on":""}${isPred?" p-pred":""}${isFert?" p-fert":""}${isOvul?" p-ovul":""}${iso===tk?" today":""}${isFuture?" future":""}">${d}</div>`;
+  }
+  $("floCalGrid").innerHTML=html;
+}
+
+$("floCalGrid").addEventListener("click",ev=>{
+  const cell=ev.target.closest("[data-fiso]");
+  if(!cell)return;
+  togglePeriodDate(cell.dataset.fiso);
+  renderFloModal();
+});
+$("floPrevM").onclick=()=>{floM=new Date(floM.getFullYear(),floM.getMonth()-1,1);renderFloModal()};
+$("floNextM").onclick=()=>{floM=new Date(floM.getFullYear(),floM.getMonth()+1,1);renderFloModal()};
+$("floDoneBtn").onclick=closeFloModal;
+$("floModal").addEventListener("click",ev=>{if(ev.target===$("floModal"))closeFloModal()});
+$("floQuickToday").onclick=()=>{
+  addPeriodRange(isoDate(Date.now()),Number(prof().periodDur)||5);
+  renderFloModal();
+};
+$("floQuickYesterday").onclick=()=>{
+  addPeriodRange(isoDate(Date.now()-DAY),Number(prof().periodDur)||5);
+  renderFloModal();
+};
+
 function togglePeriodDate(iso){
   if(!iso)return;
   const p=prof();
@@ -904,12 +1008,10 @@ function renderCycleWidgets(){
 
   const info=getCycleInfo(p);
   const g=CYCLE_GUIDES[info.guideKey]||CYCLE_GUIDES.unset;
-  const todayIso=isoDate(Date.now());
   const nextDateStr=info.nextIso?dstr(Date.parse(info.nextIso+"T12:00:00"),"short"):"";
   const ovulDateStr=info.ovulIso?dstr(Date.parse(info.ovulIso+"T12:00:00"),"short"):"";
-  const nextTxt=info.nextIn!=null?(info.nextIn>0?`мес. через ${info.nextIn} дн. (${nextDateStr})`:info.nextIn===0?"ожидаются сегодня":`задержка ${Math.abs(info.nextIn)} дн.`):"дата не задана";
+  const nextTxt=info.nextIn!=null?(info.nextIn>0?`мес. через ${info.nextIn} дн. (${nextDateStr})`:info.nextIn===0?"ожидаются сегодня":`задержка ${Math.abs(info.nextIn)} дн.`):"нажмите кнопку справа";
 
-  // SVG Circular Ring (like Flo / Eva)
   const pct=info.day?Math.min(1,info.day/info.len):0;
   const R=28,C=2*Math.PI*R;
   const dash=(C*pct).toFixed(1);
@@ -930,9 +1032,7 @@ function renderCycleWidgets(){
           <div class="meta">${nextTxt}</div>
         </div>
       </div>
-      <button type="button" class="btn sm ${info.isPeriodToday?"":"ghost"}" id="btnCycleTodayToggle" style="${info.isPeriodToday?"background:var(--rose);color:#fff":"color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)"}">
-        ${info.isPeriodToday?"✓ Отмечено":"Месячные"}
-      </button>
+      <button type="button" class="flo-fab" id="btnOpenFloToday">Отметить дни</button>
     </div>
     ${info.day?`<div class="cycle-badges">
       <span class="cbadge ovul">Овуляция: ~${ovulDateStr} (${info.ovulDay}-й д.)</span>
@@ -949,7 +1049,7 @@ function renderCycleWidgets(){
     </details>
   </div>`;
 
-  $("btnCycleTodayToggle").onclick=()=>togglePeriodDate(todayIso);
+  $("btnOpenFloToday").onclick=()=>openFloModal();
   const askBtn=$("btnAskCycleAi");
   if(askBtn)askBtn.onclick=()=>{
     show("ai");
@@ -958,8 +1058,7 @@ function renderCycleWidgets(){
     askAiQuestion(q);
   };
 
-  // Entry collapsible block + Cycle History List (like Flo)
-  const recentDates=info.hist.dates.slice().reverse().slice(0,14);
+  // Entry clean Flo-style launcher + cycle history
   const blocksHtml=info.hist.blocks.slice().reverse().slice(0,6).map((b,idx,arr)=>{
     const startTs=Date.parse(b[0]+"T12:00:00");
     const prevBlock=arr[idx+1];
@@ -969,28 +1068,12 @@ function renderCycleWidgets(){
 
   $("cycleEntryCard").innerHTML=`
     <div class="rowx" style="justify-content:space-between">
-      <div><b>${info.day?info.day+"-й день":"Цикл не настроен"}</b><div class="meta">${info.phase} · ${nextTxt}</div></div>
-      <button type="button" class="btn sm ${info.isPeriodToday?"":"ghost"}" id="btnCycleEntryToggle" style="${info.isPeriodToday?"background:var(--rose);color:#fff":"color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)"}">
-        ${info.isPeriodToday?"✓ Сегодня есть":"Отметить сегодня"}
-      </button>
+      <div><b>${info.day?info.day+"-й день цикла":"Цикл не настроен"}</b><div class="meta">${info.phase} · ${nextTxt}</div></div>
+      <button type="button" class="flo-fab" id="btnOpenFloEntry">Открыть календарь</button>
     </div>
-    <div class="stack" style="border-top:1px solid var(--line);padding-top:10px">
-      <span class="meta">Отметить даты месячных:</span>
-      <div class="row3" style="grid-template-columns:1.2fr auto auto">
-        <input type="date" id="cycPickDate" value="${todayIso}">
-        <button type="button" class="btn sm ghost" id="btnCycAddOne">+ 1 день</button>
-        <button type="button" class="btn sm ghost" id="btnCycAddFive">+ ${p.periodDur||5} дней</button>
-      </div>
-    </div>
-    ${recentDates.length?`<div class="cycle-chips">${recentDates.map(d=>`<span class="cycle-chip">${dstr(Date.parse(d+"T12:00:00"),"short")}<button type="button" data-rmper="${d}">×</button></span>`).join("")}</div>`:""}
-    ${blocksHtml?`<div class="stack" style="border-top:1px solid var(--line);padding-top:10px;gap:2px"><span class="meta" style="margin-bottom:4px">История прошлых циклов:</span>${blocksHtml}</div>`:""}`;
+    ${blocksHtml?`<div class="stack" style="border-top:1px solid var(--line);padding-top:10px;gap:2px"><span class="meta" style="margin-bottom:4px">История прошлых циклов:</span>${blocksHtml}</div>`:`<div class="sub">Нажмите «Открыть календарь» и просто кликайте по дням месячных — как в Flo.</div>`}`;
 
-  $("btnCycleEntryToggle").onclick=()=>togglePeriodDate(todayIso);
-  $("btnCycAddOne").onclick=()=>{const d=$("cycPickDate").value;if(d)togglePeriodDate(d)};
-  $("btnCycAddFive").onclick=()=>{const d=$("cycPickDate").value;if(d)addPeriodRange(d,Number(p.periodDur)||5)};
-  $("cycleEntryCard").querySelectorAll("[data-rmper]").forEach(b=>{
-    b.onclick=()=>togglePeriodDate(b.dataset.rmper);
-  });
+  $("btnOpenFloEntry").onclick=()=>openFloModal();
 
   // Cycle Statistics Card on Reports (Flo style)
   $("cycleStatsCard").innerHTML=`
@@ -998,7 +1081,9 @@ function renderCycleWidgets(){
       <div class="tile" style="background:var(--bg);box-shadow:none"><span class="k">Средний цикл</span><span class="v">${info.hist.avgLen} <small>дн.</small></span><span class="n">${info.hist.regularity}</span></div>
       <div class="tile" style="background:var(--bg);box-shadow:none"><span class="k">Длительность мес.</span><span class="v">${info.hist.avgDuration} <small>дн.</small></span><span class="n">записано циклов: ${info.hist.starts.length}</span></div>
     </div>
-    ${blocksHtml?`<div class="stack" style="gap:2px">${blocksHtml}</div>`:`<div class="sub">Отмечайте начало и дни месячных в календаре, чтобы видеть динамику длины циклов.</div>`}`;
+    ${blocksHtml?`<div class="stack" style="gap:2px">${blocksHtml}</div>`:`<div class="sub">Отмечайте дни месячных в календаре, чтобы видеть динамику длины циклов.</div>`}
+    <button type="button" class="btn sm ghost" id="btnOpenFloRep" style="color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent);align-self:flex-start">Изменить дни месячных в календаре</button>`;
+  $("btnOpenFloRep").onclick=()=>openFloModal();
 }
 
 /* ---------- Smart Care & Notifications ---------- */
