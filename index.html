@@ -13,7 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;500;600&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* Layout idea: a sky card that changes with the time of day carries the main reading and its trace; everything else sits in soft rounded panels below. */
 :root{
   --bg:#f3f4f8; --surface:#ffffff; --ink:#111318; --muted:#6b7280; --line:#e4e7ee; --accent:#4353ff; --on:#fff;
   --ok:#12996b; --warn:#c77700; --bad:#e0443c;
@@ -37,11 +36,15 @@ html.big{zoom:1.18}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
 .wrap{max-width:560px;margin:0 auto;padding:18px 16px 120px;display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-direction:column;gap:2px}
-header .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+header .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+header .hdr-actions{display:flex;align-items:center;gap:8px}
 h1{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.1;margin:0;letter-spacing:-.02em}
 #where{font-size:14px;color:var(--muted)}
 #whoSel{font-size:13px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:0;border-radius:999px;padding:6px 12px;width:auto;cursor:pointer}
 #whoSel.hide{display:none}
+.gear-btn{width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);flex-shrink:0}
+.gear-btn.on{background:var(--ink);color:var(--bg)}
+.gear-btn svg{width:20px;height:20px}
 h2{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:-.01em;margin:6px 0 -6px;text-wrap:balance}
 .sub{color:var(--muted);font-size:14px}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -87,7 +90,7 @@ svg{display:block;width:100%;height:auto}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;color:var(--muted);min-width:0}
-input[type=number],input[type=text],input[type=email],input[type=password],input[type=time],select,textarea{background:var(--bg);border:1.5px solid transparent;border-radius:14px;padding:12px;width:100%;min-width:0;font-size:16px;color:var(--ink)}
+input[type=number],input[type=text],input[type=email],input[type=password],input[type=time],input[type=date],select,textarea{background:var(--bg);border:1.5px solid transparent;border-radius:14px;padding:12px;width:100%;min-width:0;font-size:16px;color:var(--ink)}
 input[type=number]{font-family:var(--display);font-size:22px;font-weight:500;padding:9px 12px}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:0}
 input[type=range]{width:100%;accent-color:var(--accent)}
@@ -112,11 +115,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .results{display:flex;flex-direction:column;gap:6px}
 .results button{text-align:left;background:var(--bg);border:0;border-radius:14px;padding:12px;cursor:pointer}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:12px;background:var(--bg);font-variant-numeric:tabular-nums}
+.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:12px;background:var(--bg);font-variant-numeric:tabular-nums;position:relative}
 .cal .h{background:none;color:var(--muted);font-size:12px;aspect-ratio:auto;padding:2px 0}
 .cal .e{background:none}
 .cal .ok{background:var(--ok);color:#fff} .cal .warn{background:var(--warn);color:#fff} .cal .bad{background:var(--bad);color:#fff}
 .cal .today{outline:2px solid var(--ink);outline-offset:1px}
+.cal .period::after{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:#e11d48}
+.cal .ok.period::after,.cal .warn.period::after,.cal .bad.period::after{background:#fff}
 #calT{font-family:var(--display);font-weight:600;font-size:17px}
 .scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
@@ -132,7 +137,7 @@ th{color:var(--muted);font-weight:500;font-size:12px}
 nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:50;display:flex;justify-content:center}
 nav div{display:flex;max-width:536px;width:100%;gap:2px;padding:6px;border-radius:999px;
   background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 2px 6px rgba(17,19,24,.08),0 12px 32px rgba(17,19,24,.14);border:1px solid var(--line)}
-nav a{flex:1;text-align:center;padding:13px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;color:var(--muted);text-decoration:none;font-weight:600;font-size:12.5px;border-radius:999px}
+nav a{flex:1;text-align:center;padding:12px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;color:var(--muted);text-decoration:none;font-weight:600;font-size:12.5px;border-radius:999px}
 nav a.on{background:var(--ink);color:var(--bg)}
 .view{display:none;flex-direction:column;gap:18px} .view.on{display:flex}
 textarea.out{height:140px;font-size:12px;font-family:ui-monospace,monospace}
@@ -143,12 +148,54 @@ html.simple .adv{display:none}
 .hours div{flex:0 0 70px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:16px;background:var(--bg)}
 .hours b{font-family:var(--display);font-weight:500;font-size:18px}
 .ai-out{background:var(--bg);border-radius:16px;padding:14px;font-size:15px;line-height:1.55;white-space:pre-wrap}
+/* Cycle Card & Guide */
+.cycle-card{background:linear-gradient(135deg,color-mix(in srgb,#e11d48 11%,var(--surface)),color-mix(in srgb,#ec4899 6%,var(--surface)));border-left:5px solid #e11d48}
+.cycle-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cycle-day{font-family:var(--display);font-size:24px;font-weight:600;color:#e11d48}
+.cycle-guide{background:var(--surface);border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:6px}
+.cycle-guide b{color:var(--ink)}
+.cycle-tag{display:inline-block;font-size:12px;font-weight:600;color:#e11d48;background:color-mix(in srgb,#e11d48 12%,transparent);padding:2px 9px;border-radius:999px;align-self:flex-start}
+/* AI Q&A, Photo Upload & Period Tabs */
+.period-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:var(--bg);padding:4px;border-radius:14px}
+.period-tabs button{border:0;background:transparent;padding:9px 4px;border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.period-tabs button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.qa-presets{display:flex;flex-wrap:wrap;gap:6px}
+.qa-presets button{border:0;background:var(--bg);color:var(--ink);font-size:13px;padding:8px 12px;border-radius:999px;cursor:pointer;text-align:left}
+.qa-presets button:active{transform:scale(.97)}
+.qa-row{display:flex;gap:8px;align-items:stretch}
+.qa-row input{flex:1}
+.qa-row button{flex-shrink:0;padding:12px 16px}
+.qa-hist{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto}
+.qa-msg{border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap}
+.qa-msg.q{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink);align-self:flex-end;max-width:88%;font-weight:500}
+.qa-msg.a{background:var(--bg);color:var(--ink);align-self:flex-start;width:100%}
+.photo-preview{position:relative;display:inline-block;max-width:160px}
+.photo-preview img{width:100%;border-radius:14px;display:block;border:1px solid var(--line)}
+.photo-preview button{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:0;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1}
+.rx-item{background:var(--bg);border-radius:14px;padding:10px 12px;font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+/* Smart Reminder Banner on Today */
+.rem-card{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),color-mix(in srgb,var(--ok) 8%,var(--surface)));border-left:5px solid var(--accent)}
+/* Segmented Gender Control */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:4px;border-radius:14px}
+.seg button{border:0;background:transparent;padding:10px;border-radius:10px;font-weight:500;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 /* Welcome Auth Gate */
 .gate{position:fixed;inset:0;z-index:100;background:var(--bg);overflow-y:auto;padding:24px 16px;display:flex;align-items:center;justify-content:center}
 .gate-box{max-width:420px;width:100%;display:flex;flex-direction:column;gap:16px}
 .gate-hero{background:linear-gradient(160deg,#2f8cff 0%,#5a6bff 60%,#7a5cff 100%);color:#fff;border-radius:28px;padding:24px 20px;box-shadow:var(--shadow)}
 .gate-hero h2{margin:0 0 6px;font-size:24px;color:#fff}
 .gate-hero p{margin:0;font-size:14px;opacity:.88}
+
+/* Print / PDF Styles */
+@media print{
+  body{background:#fff !important;color:#000 !important;font-size:13px}
+  nav,.gear-btn,#whoSel,.btn,.link,.qa-presets,.qa-row,.period-tabs,.photo-btns,#demo,.banner{display:none !important}
+  .wrap{max-width:100%;padding:0}
+  .view{display:none !important}
+  .view.print-target{display:flex !important}
+  .card{box-shadow:none !important;border:1px solid #ddd;border-radius:12px;break-inside:avoid}
+  .ai-out,.qa-msg.a{background:#f9f9fb !important;border:1px solid #e0e0e0}
+}
 </style>
 </head>
 <body>
@@ -158,15 +205,26 @@ html.simple .adv{display:none}
   <div class="gate-box">
     <div class="gate-hero">
       <h2>Метеотрекер</h2>
-      <p>Дневник давления и самочувствия с погодой, облачной синхронизацией и общим доступом для близких.</p>
+      <p>Дневник давления и самочувствия с погодой, ИИ-помощником, облачной синхронизацией и доступом для близких.</p>
     </div>
     <div class="card stack">
+      <div class="seg" id="gTabs">
+        <button type="button" class="on" data-m="in">Вход</button>
+        <button type="button" class="m-up" data-m="up">Регистрация</button>
+      </div>
+      <div id="gRegFields" class="stack hide">
+        <label for="gName">Ваше имя<input id="gName" type="text" placeholder="Например, Айя"></label>
+        <div class="stack" style="gap:5px">
+          <span class="meta">Пол (для учёта цикла и самочувствия)</span>
+          <div class="seg" id="gSexSeg">
+            <button type="button" class="on" data-sex="f">Женский</button>
+            <button type="button" data-sex="m">Мужской</button>
+          </div>
+        </div>
+      </div>
       <label for="gEmail">Почта<input id="gEmail" type="email" placeholder="name@example.com" autocomplete="email"></label>
       <label for="gPass">Пароль (от 6 символов)<input id="gPass" type="password" placeholder="••••••" autocomplete="current-password"></label>
-      <div class="row2">
-        <button class="btn" type="button" id="gSignIn">Войти</button>
-        <button class="btn ghost" type="button" id="gSignUp">Регистрация</button>
-      </div>
+      <button class="btn" type="button" id="gSubmit">Войти</button>
       <div class="sub" id="gMsg"></div>
     </div>
     <button class="link" type="button" id="gSkip" style="align-self:center;font-size:14px">Продолжить без входа (только на этом телефоне)</button>
@@ -175,15 +233,26 @@ html.simple .adv{display:none}
 
 <div class="wrap">
   <header>
-    <div class="top"><h1>Метеотрекер</h1><select id="whoSel" class="nt hide" aria-label="Профиль"></select></div>
+    <div class="top">
+      <h1>Метеотрекер</h1>
+      <div class="hdr-actions">
+        <select id="whoSel" class="nt hide" aria-label="Профиль"></select>
+        <button type="button" class="gear-btn" id="gearBtn" aria-label="Настройки" title="Настройки">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
     <div id="where">Загрузка…</div>
   </header>
   <div class="banner hide" id="demo">Погода и воздух показаны примерные. Живые данные появятся, когда приложение размещено на своём адресе в интернете и есть связь.</div>
 
+  <!-- VIEW 1: TODAY -->
   <section class="view" id="v-today">
     <div class="sky" id="sky"><div class="hero" id="hero"></div><div id="pchart"></div>
       <div class="legend"><span><i style="background:var(--accent)"></i>последние 3 дня</span><span><i style="background:var(--muted)"></i>прогноз на 2 дня</span></div></div>
     <div class="alerts" id="alerts"></div>
+    <div id="smartCareToday"></div>
+    <div id="cycleTodayBox" class="hide"></div>
     <h2>Ближайшие сутки</h2>
     <div class="card stack"><div class="scroll"><div class="hours" id="hours"></div></div>
       <div class="sub">Время, температура, давление и вероятность осадков.</div></div>
@@ -193,6 +262,7 @@ html.simple .adv{display:none}
     <div class="card" id="days"></div>
   </section>
 
+  <!-- VIEW 2: ENTRY -->
   <section class="view" id="v-entry">
     <h2>Быстрая запись: как вы сейчас?</h2>
     <div class="quick">
@@ -201,6 +271,12 @@ html.simple .adv{display:none}
       <button type="button" class="b" data-q="2">Плохо</button>
     </div>
     <div class="sub" id="qsaved"></div>
+
+    <div id="cycleEntrySection" class="stack hide">
+      <h2>Женский цикл</h2>
+      <div class="card cycle-card stack" id="cycleEntryCard"></div>
+    </div>
+
     <h2>Измерение</h2>
     <form class="card stack" id="f">
       <label for="tod" class="adv">Время измерения
@@ -238,8 +314,8 @@ html.simple .adv{display:none}
     <div class="sub">К каждой записи приложение само добавляет погоду, воздух, Kp-индекс и фазу Луны на этот момент.</div>
   </section>
 
+  <!-- VIEW 3: HISTORY -->
   <section class="view" id="v-history">
-    <div class="banner hide ex">Пока записей нет. Показаны примеры, чтобы было видно, как это выглядит.</div>
     <h2>Сравнение</h2>
     <div class="card stack">
       <div class="row2">
@@ -253,38 +329,137 @@ html.simple .adv{display:none}
     <div class="card stack">
       <div class="rowx" style="justify-content:space-between"><button class="btn ghost sm" type="button" id="calPrev">Раньше</button><b id="calT"></b><button class="btn ghost sm" type="button" id="calNext">Позже</button></div>
       <div class="cal" id="cal"></div>
-      <div class="legend"><span><i style="background:var(--ok)"></i>хороший день</span><span><i style="background:var(--warn)"></i>средний</span><span><i style="background:var(--bad)"></i>плохой</span></div>
+      <div class="legend"><span><i style="background:var(--ok)"></i>хороший день</span><span><i style="background:var(--warn)"></i>средний</span><span><i style="background:var(--bad)"></i>плохой</span><span id="calCycleLegend" class="hide"><i style="background:#e11d48"></i>день цикла</span></div>
     </div>
     <h2>Записи</h2>
     <div class="card" id="list"></div>
   </section>
 
+  <!-- VIEW 4: REPORTS -->
   <section class="view" id="v-reports">
-    <div class="banner hide ex">Пока записей нет. Отчёты построены на примерах.</div>
-    <h2>ИИ-помощник</h2>
+    <h2>Период отчёта</h2>
+    <div class="period-tabs" id="repPeriodTabs">
+      <button type="button" data-d="1">День</button>
+      <button type="button" class="on" data-d="7">Неделя</button>
+      <button type="button" data-d="30">Месяц</button>
+      <button type="button" data-d="365">Год</button>
+    </div>
+    <div class="grid" id="week"></div>
+
+    <h2>Закономерности и связь с ИИ</h2>
     <div class="card stack">
-      <div class="sub">ИИ проанализирует ваши записи за последние 28 дней, найдёт связи с погодой и сном и подготовит вопросы для врача.</div>
-      <div class="row2">
-        <button class="btn" type="button" id="aiRun">Анализ ИИ</button>
-        <button class="btn ghost" type="button" id="aiCopyPrompt">Спросить ИИ (копия)</button>
-      </div>
-      <div class="ai-out hide nt" id="aiOut"></div>
-      <textarea class="out hide" id="aiPromptOut" readonly aria-label="Сводка для ИИ"></textarea>
+      <div id="pat"></div>
+      <div class="sub">Совпадения по вашим замерам. Нажмите кнопку ниже, чтобы ИИ объяснил эти связи и подсказал, как сгладить перепады.</div>
+      <button class="btn ghost" type="button" id="patAiBtn">Разобрать закономерности с ИИ →</button>
     </div>
 
-    <h2>Сводка за 7 дней</h2>
-    <div class="grid" id="week"></div>
-    <h2>Закономерности</h2>
-    <div class="card stack"><div id="pat"></div>
-      <div class="sub">Это совпадения в ваших записях, а не доказанные причины. Чем больше записей, тем надёжнее.</div></div>
     <h2>Страница для врача: давление за 28 дней</h2>
-    <div class="card stack"><div id="docSum"></div><div class="scroll" id="doc"></div>
-      <button class="btn ghost" type="button" id="docCopy">Скопировать для врача</button>
-      <textarea class="out hide" id="docOut" readonly aria-label="Текст для врача"></textarea></div>
+    <div class="card stack">
+      <div id="docSum"></div>
+      <div class="scroll" id="doc"></div>
+      <div class="row2">
+        <button class="btn ghost" type="button" id="docCopy">Скопировать текст</button>
+        <button class="btn" type="button" id="docPdfBtn">Сохранить в PDF</button>
+      </div>
+      <textarea class="out hide" id="docOut" readonly aria-label="Текст для врача"></textarea>
+    </div>
   </section>
 
-  <section class="view" id="v-more">
-    <h2>Облако и вход</h2>
+  <!-- VIEW 5: DEDICATED AI TAB -->
+  <section class="view" id="v-ai">
+    <h2>Фото назначений врача / лекарств</h2>
+    <div class="card stack">
+      <div class="sub">Сфотографируйте лист назначений, рецепт, упаковку лекарств или экран тонометра — или выберите фото из галереи. ИИ расшифрует рекомендации, сохранит их в контекст и поможет настроить напоминания.</div>
+      <div class="row2 photo-btns">
+        <button class="btn ghost" type="button" id="btnCam">📷 Сфотографировать</button>
+        <button class="btn ghost" type="button" id="btnGal">🖼 Из галереи</button>
+      </div>
+      <input type="file" id="inpCam" accept="image/*" capture="environment" class="hide">
+      <input type="file" id="inpGal" accept="image/*" class="hide">
+      <div id="photoPreviewBox" class="hide stack">
+        <div class="photo-preview">
+          <img id="photoPreviewImg" alt="Выбранное фото">
+          <button type="button" id="photoClear" title="Убрать фото">×</button>
+        </div>
+        <div class="sub" id="photoStatus">Фото готово к отправке с вашим вопросом или нажатию «Расшифровать фото».</div>
+        <button class="btn" type="button" id="btnAnalyzePhoto">Расшифровать фото с ИИ</button>
+      </div>
+      <div id="savedRxBox" class="stack hide" style="border-top:1px solid var(--line);padding-top:10px">
+        <div class="rowx" style="justify-content:space-between">
+          <span class="meta">Сохранённые рекомендации врача (учитываются в советах ИИ):</span>
+          <button type="button" class="link" id="clearRxBtn">Очистить</button>
+        </div>
+        <div id="savedRxList" class="stack"></div>
+      </div>
+    </div>
+
+    <h2>Отчёт ИИ за период и совет дня</h2>
+    <div class="card stack">
+      <div class="period-tabs" id="aiPeriodTabs">
+        <button type="button" data-d="1">День</button>
+        <button type="button" class="on" data-d="7">Неделя</button>
+        <button type="button" data-d="30">Месяц</button>
+        <button type="button" data-d="365">Год</button>
+      </div>
+      <div class="sub">ИИ соберёт давление, пульс, сон, цикл, погоду, ваши закономерности и рекомендации врача с фото, даст персональные советы и подготовит отчёт для врача.</div>
+      <div class="row2">
+        <button class="btn" type="button" id="aiRun">Сделать отчёт ИИ</button>
+        <button class="btn ghost" type="button" id="aiPdfBtn">Ответ ИИ в PDF</button>
+      </div>
+      <div class="ai-out hide nt" id="aiOut"></div>
+      <button class="link hide" type="button" id="aiCopyRespBtn">Скопировать ответ ИИ текстом</button>
+    </div>
+
+    <h2>Чат с ИИ-помощником</h2>
+    <div class="card stack">
+      <div class="qa-presets" id="qaPresets"></div>
+      <div class="qa-row">
+        <input type="text" id="qaInput" placeholder="Задайте вопрос или прикрепите фото выше…">
+        <button class="btn" type="button" id="qaSend">Спросить</button>
+      </div>
+      <div class="qa-hist hide nt" id="qaHist"></div>
+    </div>
+  </section>
+
+  <!-- VIEW 6: SETTINGS (GEAR) -->
+  <section class="view" id="v-settings">
+    <h2>Умные уведомления и забота о себе</h2>
+    <div class="card stack">
+      <div class="sub">Напоминания о лекарствах, воде, замерах давления и предупреждения перед сложными погодными днями, чтобы самочувствие оставалось ровным в любой день.</div>
+      <button class="btn ghost" type="button" id="btnNotifPerm">Включить системные уведомления</button>
+      <div class="sub" id="notifPermStatus"></div>
+      <label class="chip" for="remWeather"><input type="checkbox" id="remWeather" checked><span>Предупреждать о резких перепадах погоды и Kp</span></label>
+      <label class="chip" for="remWater"><input type="checkbox" id="remWater" checked><span>Напоминать пить воду днём (каждые 3 часа)</span></label>
+      <div class="row3">
+        <label for="remMorn">Утро (таблетки/АД)<input type="time" id="remMorn" value="08:30"></label>
+        <label for="remDay">День<input type="time" id="remDay" value="14:00"></label>
+        <label for="remEve">Вечер (таблетки/АД)<input type="time" id="remEve" value="20:30"></label>
+      </div>
+      <button class="btn sm ghost" type="button" id="btnTestNotif" style="align-self:flex-start">Проверить напоминание сейчас</button>
+    </div>
+
+    <h2>Настройки профиля</h2>
+    <div class="card stack">
+      <label for="profSel">Активный профиль<select id="profSel" class="nt"></select></label>
+      <div class="row2">
+        <label for="profEditName">Имя профиля<input id="profEditName" type="text"></label>
+        <label for="profEditSex">Пол<select id="profEditSex"><option value="f">Женский</option><option value="m">Мужской</option><option value="">Не указан</option></select></label>
+      </div>
+      <div id="cycleSettingsBox" class="row2 hide" style="border-top:1px solid var(--line);padding-top:12px">
+        <label for="cycLen">Длина цикла (дней)<input id="cycLen" type="number" min="20" max="45" value="28"></label>
+        <label for="cycLast">Начало последних месячных<input id="cycLast" type="date"></label>
+      </div>
+      <div class="stack" style="border-top:1px solid var(--line);padding-top:12px">
+        <span class="meta">Добавить близкого человека</span>
+        <div class="row3" style="grid-template-columns:1.2fr .9fr auto">
+          <input id="profNew" type="text" placeholder="Имя (Мама)">
+          <select id="profNewSex"><option value="f">Жен.</option><option value="m">Муж.</option></select>
+          <button class="btn ghost" type="button" id="profAdd">+</button>
+        </div>
+      </div>
+    </div>
+
+    <h2>Облако и семейный доступ</h2>
     <div class="card stack" id="authBox">
       <div id="authLoggedOut" class="stack">
         <div class="sub">Войдите, чтобы записи сохранялись в облаке, открывались на разных телефонах и были доступны родным.</div>
@@ -314,14 +489,6 @@ html.simple .adv{display:none}
       </div>
     </div>
 
-    <h2 class="nt">Язык · Тіл · Language</h2>
-    <div class="card nt"><select id="lang" aria-label="Language"><option value="ru">Русский</option><option value="kk">Қазақша</option><option value="en">English</option></select></div>
-    <h2>Чьи записи</h2>
-    <div class="card stack">
-      <label for="profSel">Человек<select id="profSel" class="nt"></select></label>
-      <div class="row2"><label for="profNew">Добавить человека<input id="profNew" type="text" placeholder="Например, Мама"></label>
-        <button class="btn ghost" type="button" id="profAdd" style="align-self:end">Добавить</button></div>
-    </div>
     <h2>Город</h2>
     <div class="card stack">
       <label for="cityList">Выбрать из списка<select id="cityList"></select></label>
@@ -329,24 +496,27 @@ html.simple .adv{display:none}
         <button class="btn ghost" id="citySearch" type="button" style="align-self:end">Найти</button></div>
       <div class="results nt" id="cityRes"></div>
     </div>
+
     <h2>Лекарства</h2>
     <div class="card stack">
       <div id="medList"></div>
       <div class="row2"><label for="medName">Название и доза<input id="medName" type="text" placeholder="Как на упаковке"></label>
         <label for="medTime">Когда<select id="medTime"><option value="утро">утро</option><option value="день">день</option><option value="вечер">вечер</option></select></label></div>
       <button class="btn ghost" type="button" id="medAdd">Добавить лекарство</button>
-      <div class="sub">Список нужен только для отметок «принято». Дозы и назначения определяет врач.</div>
+      <div class="sub">Список нужен для отметок «принято» и умных напоминаний. Дозы и назначения определяет врач.</div>
     </div>
-    <h2>Вид</h2>
+
+    <h2>Оформление и язык</h2>
     <div class="card stack">
+      <label for="lang" class="nt">Язык · Тіл · Language<select id="lang"><option value="ru">Русский</option><option value="kk">Қазақша</option><option value="en">English</option></select></label>
       <label class="chip" for="big"><input id="big" type="checkbox"><span>Крупный текст</span></label>
       <label for="theme">Тема<select id="theme"><option value="auto">как в телефоне</option><option value="light">светлая</option><option value="dark">тёмная</option></select></label>
     </div>
-    <h2>Данные</h2>
+
+    <h2>Экспорт данных</h2>
     <div class="card stack">
       <button class="btn ghost" id="csvBtn" type="button">Скопировать все записи (CSV)</button>
       <textarea id="csv" class="out hide" readonly aria-label="Записи в формате CSV"></textarea>
-      <div class="sub">После входа в аккаунт записи хранятся в облаке. Вы также можете в любой момент скопировать их в CSV.</div>
     </div>
   </section>
 </div>
@@ -355,7 +525,7 @@ html.simple .adv{display:none}
   <a href="#entry" data-v="entry">Запись</a>
   <a href="#history" data-v="history">История</a>
   <a href="#reports" data-v="reports">Отчёты</a>
-  <a href="#more" data-v="more">Ещё</a>
+  <a href="#ai" data-v="ai">ИИ</a>
 </div></nav>
 
 <script>
@@ -372,6 +542,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
 const hm=s=>s?new Date(s*1000).toLocaleTimeString(LOC,{hour:"2-digit",minute:"2-digit"}):"—";
 const dkey=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+const isoDate=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const dshort=ts=>dstr(ts,"short");
 
 /* ---------- Supabase Init ---------- */
@@ -383,105 +554,24 @@ let sbShares=[];
 
 /* ---------- State ---------- */
 let S=store.get("mt2",null);
-if(!S)S={profiles:[{id:1,name:"Я",city:store.get("mt_city",{name:"Астана",lat:51.1801,lon:71.446}),meds:[]}],cur:1,big:false,theme:"auto"};
+if(!S)S={profiles:[{id:1,name:"Я",sex:"f",cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city:store.get("mt_city",{name:"Астана",lat:51.1801,lon:71.446}),meds:[]}],cur:1,big:false,theme:"auto"};
+if(!S.reminders)S.reminders={weather:true,water:true,morn:"08:30",day:"14:00",eve:"20:30",fired:{}};
 let ALL=store.get("mt2_entries",null);
 if(!ALL)ALL=store.get("mt_entries",[]).map(e=>Object.assign({pid:1},e));
 
+let repDays=7;
+let aiDays=7;
+let pendingImageDataUrl=null;
+
 /* ---------- Languages ---------- */
 const TR=[
-["Сегодня","Today","Бүгін"],["Запись","Entry","Жазба"],["История","History","Тарих"],["Отчёты","Reports","Есептер"],["Ещё","More","Тағы"],
+["Сегодня","Today","Бүгін"],["Запись","Entry","Жазба"],["История","History","Тарих"],["Отчёты","Reports","Есептер"],["ИИ","AI","ЖИ"],
 ["Загрузка…","Loading…","Жүктелуде…"],["обновление…","updating…","жаңартылуда…"],
 ["Ближайшие сутки","Next 24 hours","Алдағы тәулік"],
-["Время, температура, давление и вероятность осадков.","Time, temperature, pressure and chance of precipitation.","Уақыт, температура, қысым және жауын-шашын ықтималдығы."],
 ["Сейчас","Now","Қазір"],["сейчас","now","қазір"],["Прогноз на 5 дней","5-day forecast","5 күнге болжам"],
-["последние 3 дня","last 3 days","соңғы 3 күн"],["прогноз на 2 дня","2-day forecast","2 күнге болжам"],
-["Погода и воздух показаны примерные. Живые данные появятся, когда приложение размещено на своём адресе в интернете и есть связь.","Weather and air values are examples. Live data appears when the app is hosted at its own web address and there is a connection.","Ауа райы мен ауа сапасы үлгі ретінде көрсетілген. Нақты деректер қолданба интернетте өз мекенжайында орналасқанда және байланыс болғанда пайда болады."],
-["Быстрая запись: как вы сейчас?","Quick entry: how are you now?","Жылдам жазба: қазір халіңіз қалай?"],
 ["Хорошо","Good","Жақсы"],["Средне","So-so","Орташа"],["Плохо","Bad","Нашар"],
-["Измерение","Measurement","Өлшеу"],["Время измерения","Time of measurement","Өлшеу уақыты"],
-["Перед измерением посидите 5 минут спокойно.","Sit quietly for 5 minutes before measuring.","Өлшер алдында 5 минут тыныш отырыңыз."],
-["Лучше измерить дважды с перерывом в минуту: приложение запишет среднее.","Best to measure twice a minute apart: the app records the average.","Бір минут үзіліспен екі рет өлшеген дұрыс: қолданба орташасын жазады."],
-["Верхнее","Upper","Жоғарғы"],["Нижнее","Lower","Төменгі"],["Пульс","Pulse",""],
-["Второе измерение, верхнее","Second reading, upper","Екінші өлшеу, жоғарғы"],["Второе измерение, нижнее","Second reading, lower","Екінші өлшеу, төменгі"],
-["Головная боль:","Headache:","Бас ауруы:"],["Головная боль","Headache","Бас ауруы"],
-["Самочувствие:","Wellbeing:","Хал-жағдай:"],["Самочувствие","Wellbeing","Хал-жағдай"],["самочувствие","wellbeing","хал-жағдай"],
-["из 10","of 10","/ 10"],["из 9","of 9","/ 9"],["из","of","/"],
-["Симптомы","Symptoms","Белгілер"],["Лекарства приняты","Medicines taken","Дәрілер қабылданды"],["Сегодня было","Today I had","Бүгін болды"],
-["Сон, часов","Sleep, hours","Ұйқы, сағат"],["Вода, стаканов","Water, glasses","Су, стақан"],["Стресс","Stress",""],
-["нет","none","жоқ"],["немного","a little","аздап"],["сильный","strong","қатты"],
-["Заметка","Note","Ескертпе"],["Что ещё важно про этот день","Anything else important about today","Бұл күн туралы тағы не маңызды"],
-["Сохранить запись","Save entry","Жазбаны сақтау"],
-["К каждой записи приложение само добавляет погоду, воздух, Kp-индекс и фазу Луны на этот момент.","The app adds weather, air quality, Kp index and moon phase to every entry automatically.","Қолданба әр жазбаға сол сәттегі ауа райын, ауа сапасын, Kp индексін және Ай фазасын өзі қосады."],
-["Показать все поля","Show all fields","Барлық өрістерді көрсету"],["Оставить только главное","Keep only the essentials","Тек негізгісін қалдыру"],
-["Пока записей нет. Показаны примеры, чтобы было видно, как это выглядит.","No entries yet. Examples are shown so you can see how it looks.","Әзірге жазба жоқ. Қалай көрінетінін білу үшін мысалдар көрсетілген."],
-["Пока записей нет. Отчёты построены на примерах.","No entries yet. Reports are built from examples.","Әзірге жазба жоқ. Есептер мысалдар негізінде жасалған."],
-["Сравнение","Comparison","Салыстыру"],["Фактор","Factor",""],["Календарь","Calendar","Күнтізбе"],["Раньше","Earlier","Ертерек"],["Позже","Later","Кейінірек"],
-["хороший день","good day","жақсы күн"],["средний","average","орташа"],["плохой","bad","нашар"],["Записи","Entries","Жазбалар"],
-["Сводка за 7 дней","7-day summary","7 күндік қорытынды"],["Закономерности","Patterns","Заңдылықтар"],
-["Это совпадения в ваших записях, а не доказанные причины. Чем больше записей, тем надёжнее.","These are coincidences in your entries, not proven causes. The more entries, the more reliable.","Бұл — жазбаларыңыздағы сәйкестіктер, дәлелденген себептер емес. Жазба көп болған сайын сенімдірек."],
-["Страница для врача: давление за 28 дней","Page for the doctor: blood pressure over 28 days","Дәрігерге арналған бет: 28 күндегі қан қысымы"],
-["Скопировать для врача","Copy for the doctor","Дәрігер үшін көшіру"],["Текст для врача","Text for the doctor","Дәрігерге арналған мәтін"],
-["Чьи записи","Whose entries","Кімнің жазбалары"],["Человек","Person","Адам"],["Добавить человека","Add a person","Адам қосу"],["Например, Мама","For example, Mum","Мысалы, Анам"],["Добавить","Add","Қосу"],
-["Город","City","Қала"],["Выбрать из списка","Choose from the list","Тізімнен таңдау"],["Или найти по названию","Or search by name","Немесе атауы бойша іздеу"],["Например, Новосибирск","For example, Novosibirsk","Мысалы, Новосибирск"],["Найти","Search","Іздеу"],
-["Лекарства","Medicines","Дәрілер"],["лекарства","medicines","дәрілер"],["Название и доза","Name and dose","Атауы мен дозасы"],["Как на упаковке","As on the package","Қаптамадағыдай"],["Когда","When","Қашан"],["Добавить лекарство","Add medicine","Дәрі қосу"],
-["Список нужен только для отметок «принято». Дозы и назначения определяет врач.","The list is only for ticking off what was taken. Doses and prescriptions are decided by the doctor.","Тізім тек «қабылданды» белгісі үшін қажет. Дозалар мен тағайындауларды дәрігер анықтайды."],
-["Вид","Appearance","Көрініс"],["Крупный текст","Large text","Ірі мәтін"],["Тема","Theme","Тақырып"],["как в телефоне","same as phone","телефондағыдай"],["светлая","light","ашық"],["тёмная","dark","қараңғы"],
-["Данные","Data","Деректер"],["Скопировать все записи (CSV)","Copy all entries (CSV)","Барлық жазбаны көшіру (CSV)"],["Записи в формате CSV","Entries in CSV format","CSV пішіміндегі жазбалар"],
-["утро","morning","таң"],["день","afternoon","күндіз"],["вечер","evening","кеш"],
-["Атмосферное давление, мм","Air pressure, mmHg","Атмосфералық қысым, мм"],["Атмосферное давление","Air pressure","Атмосфералық қысым"],
-["мм рт. ст. Это резкий перепад.","mmHg. That is a sharp change.","мм сын. бағ. Бұл күрт өзгеріс."],["мм рт. ст.","mmHg","мм сын. бағ."],["гПа","hPa",""],["мм","mm",""],
-["за сутки","24 h","тәулікте"],["за 3 часа:","3 h:","3 сағатта:"],["за 3 часа","3 h","3 сағатта"],
-["Спокойный день","Calm day","Тыныш күн"],["Обратите внимание","Worth attention","Назар аударыңыз"],["Сложный день","Difficult day","Қиын күн"],
-["перепад давления","pressure swing","қысымның өзгеруі"],["резкая смена температуры","sharp temperature change","температураның күрт өзгеруі"],["загрязнённый воздух","polluted air","ластанған ауа"],["магнитная буря","geomagnetic storm","магниттік дауыл"],
-["За сутки давление упадёт на","Over the next 24 h pressure will fall by","Тәулік ішінде қысым төмендейді:"],["За сутки давление вырастет на","Over the next 24 h pressure will rise by","Тәулік ішінде қысым көтеріледі:"],
-["За сутки похолодает на","Over the next 24 h it will get colder by","Тәулік ішінде суытады:"],["За сутки потеплеет на","Over the next 24 h it will get warmer by","Тәулік ішінде жылытады:"],
-["Воздух сильно загрязнён:","Air is heavily polluted:","Ауа қатты ластанған:"],["Проветривать и гулять лучше позже.","Better to air rooms and walk later.","Бөлмені желдету мен серуенді кейінге қалдырған жөн."],
-["Воздух загрязнён выше нормы ВОЗ:","Air pollution is above the WHO guideline:","Ауаның ластануы ДДҰ нормасынан жоғары:"],["мкг/м³","µg/m³",""],
-["В ближайшие двое суток прогнозируется магнитная буря","A geomagnetic storm is forecast in the next two days","Алдағы екі тәулікте магниттік дауыл болжанады"],["до","up to","ең көбі"],
-["Резких перепадов в ближайшие сутки не ожидается.","No sharp changes expected in the next 24 hours.","Алдағы тәулікте күрт өзгерістер күтілмейді."],
-["резкий перепад","sharp change","күрт өзгеріс"],["заметное изменение","noticeable change","елеулі өзгеріс"],["стабильно","stable","тұрақты"],
-["буря","storm","дауыл"],["возмущение","disturbance","ауытқу"],["спокойно","calm","тыныш"],["высокое","high","жоғары"],["выше нормы","above guideline","нормадан жоғары"],["в норме","normal","қалыпты"],
-["Изменение за 24 часа","Change in 24 hours","24 сағаттағы өзгеріс"],["Температура","Temperature",""],["ощущается","feels like","сезіледі"],["Влажность","Humidity","Ылғалдылық"],["точка росы","dew point","шық нүктесі"],
-["Ветер","Wind","Жел"],["м/с","m/s",""],["порывы до","gusts up to","екпіні"],["Облачность","Cloud cover","Бұлттылық"],["осадки","precipitation","жауын-шашын"],
-["Воздух","Air","Ауа"],["пыль","dust","шаң"],["Газы в воздухе","Gases in the air","Ауадағы газдар"],["Магнитное поле","Magnetic field","Магнит өрісі"],
-["прогноз на 2 дня: до","2-day forecast: up to","2 күнге болжам: ең көбі"],["Луна, % диска","Moon, % of disc","Ай, диск %-ы"],["Луна","Moon","Ай"],["диска","of disc","диск"],
-["около полнолуния","near full moon","толық айға жақын"],["Около полнолуния","Near full moon","Толық айға жақын"],
-["новолуние","new moon","жаңа ай"],["растущий серп","waxing crescent","өсіп келе жатқан орақ"],["первая четверть","first quarter","бірінші ширек"],["растущая Луна","waxing gibbous","өсіп келе жатқан Ай"],
-["полнолуние","full moon","толық ай"],["убывающая Луна","waning gibbous","кеміп келе жатқан Ай"],["последняя четверть","last quarter","соңғы ширек"],["убывающий серп","waning crescent","кеміп келе жатқан орақ"],
-["Световой день","Daylight","Күн ұзақтығы"],["ч","h","сағ"],["восход","sunrise","күннің шығуы"],["закат","sunset","күннің батуы"],["УФ-индекс","UV index","УК индексі"],["индекс","index","индексі"],
-["Прогноз недоступен.","Forecast unavailable.","Болжам қолжетімсіз."],["похолодание на","colder by","суыту"],["потепление на","warmer by","жылыну"],["сложный день","difficult day","қиын күн"],["спокойный","calm","тыныш"],
-["График атмосферного давления в мм рт. ст.","Air pressure chart in mmHg","Атмосфералық қысым графигі, мм сын. бағ."],["График сравнения самочувствия и фактора","Chart comparing wellbeing and a factor","Хал-жағдай мен факторды салыстыру графигі"],
-["Верхнее давление","Upper pressure","Жоғарғы қысым"],["Нижнее давление","Lower pressure","Төменгі қысым"],["Изменение давления за сутки, мм","Pressure change in 24 h, mm","Қысымның тәуліктік өзгерісі, мм"],
-["Резкий перепад давления за сутки (от 4 мм)","Sharp pressure change in 24 h (4 mm or more)","Қысымның тәуліктік күрт өзгерісі (4 мм-ден)"],["Мороз ниже −10°","Frost below −10°","−10°-тан төмен аяз"],
-["Грязный воздух (PM2.5 выше 15)","Dirty air (PM2.5 above 15)","Лас ауа (PM2.5 15-тен жоғары)"],["Магнитное возмущение (Kp от 4)","Geomagnetic disturbance (Kp 4 or more)","Магниттік ауытқу (Kp 4-тен)"],
-["Сон меньше 6 часов","Sleep under 6 hours","Ұйқы 6 сағаттан аз"],["Лекарства приняты не все","Not all medicines taken","Дәрілердің бәрі қабылданбаған"],["Был кофе","Had coffee","Кофе ішілді"],["Солёная еда","Salty food","Тұзды тамақ"],["Сильный стресс","Strong stress","Қатты стресс"],
-["да:","yes:","иә:"],["нет:","no:","жоқ:"],["мало данных","not enough data","дерек аз"],["верхнее","upper","жоғарғы"],
-["Нужно минимум 14 записей с давлением. Сейчас:","At least 14 entries with blood pressure are needed. Now:","Қан қысымы бар кемінде 14 жазба қажет. Қазір:"],
-["Для графика нужно хотя бы две записи с этим показателем.","The chart needs at least two entries with this measure.","График үшін осы көрсеткіші бар кемінде екі жазба қажет."],
-["Среднее давление","Average pressure","Орташа қысым"],["замеров:","readings:","өлшеу:"],["замеров","readings","өлшеу"],["Средний пульс","Average pulse","Орташа пульс"],["уд/мин","bpm","соққы/мин"],
-["Самое высокое","Highest","Ең жоғарысы"],["давление за сутки","pressure in 24 h","тәуліктегі қысым"],["записей:","entries:","жазба:"],["приёмов","of doses","қабылдау"],
-["все отмечены как принятые","all marked as taken","бәрі қабылданды деп белгіленген"],["нет отметок","no marks","белгі жоқ"],["раз","times","рет"],["от 4 из 10","4 of 10 or more","10-нан 4 және одан жоғары"],
-["Среднее:","Average:","Орташа:"],["Дата","Date","Күні"],["Время","Time","Уақыты"],["Давление","Pressure","Қысым"],["да","yes","иә"],["не все","not all","бәрі емес"],
-["За 28 дней замеров давления нет.","No blood pressure readings in 28 days.","28 күнде қан қысымы өлшенбеген."],
-["без давления","no pressure reading","қысымсыз"],["пример","example","мысал"],["пульс","pulse",""],["голова","headache","бас"],["сон","sleep","ұйқы"],["вода","water","су"],
-["сильный стресс","strong stress","қатты стресс"],["Среда:","Environment:","Орта:"],["Удалить","Delete","Жою"],["Убрать","Remove","Алып тастау"],
-["головокружение","dizziness","бас айналу"],["тошнота","nausea","жүрек айну"],["боль в суставах","joint pain","буын ауруы"],["сердцебиение","palpitations","жүрек қағу"],["шум в ушах","ringing in the ears","құлақ шуылы"],["слабость","weakness","әлсіздік"],["отёки","swelling","ісіну"],
-["кофе","coffee",""],["алкоголь","alcohol",""],["солёное","salty food","тұзды"],["прогулка","walk","серуен"],["нагрузка","exercise","жүктеме"],
-["Запись сохранена.","Entry saved.","Жазба сақталды."],
-["Запись видна сейчас, но телефон не разрешил её сохранить. Скопируйте записи на вкладке «Ещё».","The entry is visible now, but the phone did not allow saving it. Copy your entries on the More tab.","Жазба қазір көрініп тұр, бірақ телефон оны сақтауға рұқсат бермеді. «Тағы» қойындысында жазбаларды көшіріп алыңыз."],
-["Укажите оба числа давления. Второе измерение заполняется только вместе с первым.","Enter both pressure numbers. The second reading is filled in only together with the first.","Қысымның екі санын да енгізіңіз. Екінші өлшеу тек біріншісімен бірге толтырылады."],
-["Список лекарств пуст. Добавьте их на вкладке «Ещё».","The medicine list is empty. Add them on the More tab.","Дәрілер тізімі бос. Оларды «Тағы» қойындысында қосыңыз."],
-["Лекарств в списке нет.","No medicines in the list.","Тізімде дәрі жоқ."],["Скопировано","Copied","Көшірілді"],["Ищу…","Searching…","Іздеуде…"],
-["Ничего не найдено. Проверьте название.","Nothing found. Check the name.","Ештеңе табылмады. Атауын тексеріңіз."],
-["Поиск по названию сейчас недоступен: нет связи с сервисом. Выберите город из списка выше.","Search by name is unavailable right now: no connection to the service. Choose a city from the list above.","Атауы бойынша іздеу қазір қолжетімсіз: сервиспен байланыс жоқ. Жоғарыдағы тізімнен қала таңдаңыз."],
-["Сон прошлой ночью","Last night's sleep","Өткен түнгі ұйқы"],["Отход ко сну","Bedtime","Жатқан уақыт"],["Подъём","Wake-up","Тұрған уақыт"],["Качество","Quality","Сапасы"],
-["плохо","poor","нашар"],["так себе","so-so","орташадан төмен"],["нормально","okay","қалыпты"],["хорошо","good","жақсы"],["отлично","excellent","өте жақсы"],
-["Плохой сон (оценка 1–2)","Poor sleep (rated 1–2)","Нашар ұйқы (бағасы 1–2)"],["Качество сна, 1–5","Sleep quality, 1–5","Ұйқы сапасы, 1–5"],["качество сна","sleep quality","ұйқы сапасы"],
-["Сон в среднем","Average sleep","Орташа ұйқы"],["ночей:","nights:","түн:"],["Kp-индекс","Kp index","Kp индексі"],
-["Метеотрекер","Meteotracker",""],["Записей пока нет. Сделайте первую на вкладке «Запись».","No entries yet. Make the first one on the Entry tab.","Әзірге жазба жоқ. Алғашқысын «Жазба» қойындысында жасаңыз."],["пн","Mon","дс"],["вт","Tue","сс"],["ср","Wed","ср"],["чт","Thu","бс"],["пт","Fri","жм"],["сб","Sat","сн"],["вс","Sun","жс"],
-["Астана","Astana",""],["Алматы","Almaty",""],["Шымкент","Shymkent",""],["Караганда","Karaganda","Қарағанды"],["Актобе","Aktobe","Ақтөбе"],["Тараз","Taraz",""],["Павлодар","Pavlodar",""],["Усть-Каменогорск","Oskemen","Өскемен"],["Семей","Semey",""],["Атырау","Atyrau",""],["Костанай","Kostanay","Қостанай"],["Кызылорда","Kyzylorda","Қызылорда"],["Уральск","Oral","Орал"],["Петропавловск","Petropavl","Петропавл"],["Актау","Aktau","Ақтау"],["Темиртау","Temirtau","Теміртау"],["Туркестан","Turkistan","Түркістан"],["Кокшетау","Kokshetau","Көкшетау"],["Талдыкорган","Taldykorgan","Талдықорған"],["Экибастуз","Ekibastuz","Екібастұз"],["Москва","Moscow","Мәскеу"],["Санкт-Петербург","Saint Petersburg",""],["Ташкент","Tashkent",""],["Бишкек","Bishkek","Бішкек"],
-["Облако и вход","Cloud & Sign in","Бұлт және кіру"],["Почта","Email","Пошта"],["Пароль (от 6 символов)","Password (min 6 chars)","Құпиясөз (кемінде 6 таңба)"],["Войти","Sign in","Кіру"],["Создать аккаунт","Create account","Тіркелу"],["Регистрация","Sign up","Тіркелу"],["Обновить","Sync now","Жаңарту"],["Выйти из аккаунта","Sign out","Шығу"],["Открыть доступ","Share","Рұқсат беру"],["Почта родного человека","Family member's email","Жақын адамның поштасы"],
-["ИИ-помощник","AI Assistant","ЖИ-көмекші"],["Анализ ИИ","AI Analysis","ЖИ талдауы"],["Спросить ИИ (копия)","Ask AI (copy)","ЖИ-ден сұрау (көшіру)"]
+["Измерение","Measurement","Өлшеу"],["Верхнее","Upper","Жоғарғы"],["Нижнее","Lower","Төменгі"],["Пульс","Pulse",""],
+["Сохранить запись","Save entry","Жазбаны сақтау"],["Город","City","Қала"],["Лекарства","Medicines","Дәрілер"]
 ];
 const LANG=["ru","kk","en"].includes(S.lang)?S.lang:"ru", LOC={ru:"ru-RU",kk:"ru-RU",en:"en-GB"}[LANG];
 const KM=["қаңтар","ақпан","наурыз","сәуір","мамыр","маусым","шілде","тамыз","қыркүйек","қазан","қараша","желтоқсан"],KW=["жс","дс","сс","ср","бс","жм","сн"];
@@ -515,11 +605,233 @@ const prof=()=>S.profiles.find(p=>String(p.id)===String(S.cur))||S.profiles[0];
 const mine=()=>ALL.filter(e=>String(e.pid)===String(prof().id));
 const saveS=()=>store.set("mt2",S), saveE=()=>store.set("mt2_entries",ALL);
 let env=null, demo=false, calM=new Date();
-const SYM=["головокружение","тошнота","боль в суставах","сердцебиение","шум в ушах","слабость","отёки"];
+const SYM=["головокружение","тошнота","боль в суставах","сердцебиение","шум в ушах","слабость","отёки","тянет низ живота","перепады настроения"];
 const HAB=["кофе","алкоголь","солёное","прогулка","нагрузка"];
+
+/* ---------- Detailed Cycle Guide & Logic ---------- */
+const CYCLE_GUIDES={
+  menstruation:{
+    tag:"1–5 день · Менструация",
+    what:"Уровень эстрогена и прогестерона минимален. Возможны тянущие ощущения внизу живота, сонливость, снижение артериального давления и повышенная чувствительность к холоду и перепадам погоды.",
+    todo:"Бережный режим: больше тёплой воды, полноценный сон, умеренная ходьба вместо тяжёлых тренировок. При склонности к головокружению избегайте резких подъёмов и не пропускайте приёмы пищи."
+  },
+  follicular:{
+    tag:"Фолликулярная фаза",
+    what:"Эстроген плавно растёт, сосуды лучше адаптируются к нагрузкам. Обычно в эти дни стабильнее давление, выше уровень энергии, яснее голова и легче переносятся погодные качели.",
+    todo:"Хорошее время для плановой активности, прогулок и важных дел. Продолжайте вести замеры утром и вечером, чтобы видеть свою «эталонную» норму давления."
+  },
+  ovulation:{
+    tag:"Овуляция (середина цикла)",
+    what:"Пик эстрогена и лютеинизирующего гормона. У некоторых женщин в эти 2–3 дня может слегка учащаться пульс, появляться лёгкая тяжесть внизу живота или чувствительность к жаре и духоте.",
+    todo:"Пейте достаточно воды, следите за пульсом при нагрузках и проветривайте комнату перед сном."
+  },
+  luteal:{
+    tag:"Лютеиновая фаза",
+    what:"Растёт уровень прогестерона: температура тела может быть выше на 0,3–0,5 °C, тело сильнее удерживает жидкость, возможна лёгкая утомляемость во второй половине дня.",
+    todo:"Уменьшите избыток соли и кофеина во второй половине дня, чтобы не провоцировать отёки и скачки вечернего давления."
+  },
+  pms:{
+    tag:"Поздняя лютеиновая фаза (ПМС)",
+    what:"Резкое падение прогестерона и эстрогена перед менструацией. В эти 4–5 дней чаще всего обостряется метеочувствительность: возможны головные боли, отёчность, колебания давления, тревожность и прерывистый сон.",
+    todo:"Максимально бережный режим: ложитесь спать в одно время, ограничьте солёное, алкоголь и лишний кофе, особенно если в прогнозе скачок атмосферного давления."
+  },
+  unset:{
+    tag:"Цикл не настроен",
+    what:"Укажите первый день последних месячных — приложение рассчитает фазу цикла и подскажет, как гормональный фон сегодня влияет на сосуды, сон и метеочувствительность.",
+    todo:"Нажмите «Отметить месячные», если они идут сегодня, или выберите дату начала в настройках (шестерёнка вверху справа)."
+  }
+};
+
+function getCycleInfo(p, targetTs=Date.now()){
+  if(!p||p.sex!=="f")return null;
+  const len=Number(p.cycleLen)||28;
+  const dates=Array.isArray(p.periodDates)?[...p.periodDates].sort():[];
+  let startIso=p.lastPeriod||null;
+  const targetIso=isoDate(targetTs);
+  const starts=[];
+  dates.forEach(d=>{
+    const prev=isoDate(Date.parse(d+"T12:00:00")-DAY);
+    if(!dates.includes(prev))starts.push(d);
+  });
+  if(starts.length){
+    const validStarts=starts.filter(s=>s<=targetIso);
+    if(validStarts.length)startIso=validStarts[validStarts.length-1];
+  }
+  const isPeriodToday=dates.includes(targetIso);
+  if(!startIso)return {day:null,phase:"Не указано начало цикла",guideKey:"unset",isPeriodToday,len,nextIn:null};
+  const diffDays=Math.floor((Date.parse(targetIso+"T12:00:00")-Date.parse(startIso+"T12:00:00"))/DAY);
+  if(diffDays<0)return {day:null,phase:"Ожидание начала",guideKey:"unset",isPeriodToday,len,nextIn:null};
+  const cycleDay=diffDays+1;
+  let phase="Лютеиновая фаза", guideKey="luteal";
+  if(cycleDay<=5||isPeriodToday){phase="Менструация";guideKey="menstruation"}
+  else if(cycleDay<=Math.round(len*0.45)){phase="Фолликулярная фаза";guideKey="follicular"}
+  else if(cycleDay<=Math.round(len*0.55)){phase="Овуляция";guideKey="ovulation"}
+  else if(cycleDay>=len-4){phase="Предменструальная фаза (ПМС)";guideKey="pms"}
+  const nextIn=len-diffDays;
+  return {day:cycleDay,phase,guideKey,isPeriodToday,len,nextIn,startIso};
+}
+
+function togglePeriodDate(iso){
+  const p=prof();
+  if(!Array.isArray(p.periodDates))p.periodDates=[];
+  const idx=p.periodDates.indexOf(iso);
+  if(idx>=0){
+    p.periodDates.splice(idx,1);
+  }else{
+    p.periodDates.push(iso);
+    p.periodDates.sort();
+    const prev=isoDate(Date.parse(iso+"T12:00:00")-DAY);
+    if(!p.periodDates.includes(prev)&&(!p.lastPeriod||iso>p.lastPeriod)){
+      p.lastPeriod=iso;
+    }
+  }
+  saveS();
+  pushProfileUpdate(p);
+  renderCycleWidgets();
+  renderHistory();
+}
+
+function renderCycleWidgets(){
+  const p=prof();
+  const isFem=p&&p.sex==="f";
+  $("cycleTodayBox").classList.toggle("hide",!isFem);
+  $("cycleEntrySection").classList.toggle("hide",!isFem);
+  $("calCycleLegend").classList.toggle("hide",!isFem);
+  if(!isFem)return;
+  const info=getCycleInfo(p);
+  const g=CYCLE_GUIDES[info.guideKey]||CYCLE_GUIDES.unset;
+  const todayIso=isoDate(Date.now());
+  const nextTxt=info.nextIn!=null?(info.nextIn>0?`до след. цикла ~${info.nextIn} дн.`:info.nextIn===0?"ожидается начало сегодня":`задержка ${Math.abs(info.nextIn)} дн.`):"дата начала не задана";
+
+  $("cycleTodayBox").innerHTML=`<div class="card cycle-card stack" style="gap:10px">
+    <div class="cycle-head">
+      <div>
+        <div class="k" style="font-size:12px;color:var(--muted);font-weight:600">ЖЕНСКИЙ ЦИКЛ · ГИД ДНЯ</div>
+        <div class="cycle-day">${info.day?info.day+"-й день цикла":"День не задан"}</div>
+      </div>
+      <button type="button" class="btn sm ${info.isPeriodToday?"":"ghost"}" id="btnCycleTodayToggle" style="${info.isPeriodToday?"background:#e11d48;color:#fff":"color:#e11d48;background:color-mix(in srgb,#e11d48 14%,transparent)"}">
+        ${info.isPeriodToday?"✓ Месячные идут":"Отметить месячные"}
+      </button>
+    </div>
+    <div class="meta"><b>${info.phase}</b> · ${nextTxt}</div>
+    <div class="cycle-guide">
+      <span class="cycle-tag">${g.tag}</span>
+      <div><b>Что может происходить:</b> ${g.what}</div>
+      <div><b>Что лучше сделать сегодня:</b> ${g.todo}</div>
+    </div>
+    <button type="button" class="link" id="btnAskCycleAi" style="color:#e11d48;font-weight:500">Спросить ИИ о самочувствии в этот день цикла →</button>
+  </div>`;
+  $("btnCycleTodayToggle").onclick=()=>togglePeriodDate(todayIso);
+  $("btnAskCycleAi").onclick=()=>{
+    show("ai");
+    try{history.replaceState(null,"","#ai")}catch(e){}
+    const q=info.day?`У меня сегодня ${info.day}-й день цикла (${info.phase}). Как это может влиять на моё давление и самочувствие с учётом сегодняшней погоды и моих рекомендаций врача, и что сделать, чтобы день прошёл хорошо?`:"Как женский цикл влияет на давление и метеочувствительность?";
+    askAiQuestion(q);
+  };
+
+  $("cycleEntryCard").innerHTML=`
+    <div class="rowx" style="justify-content:space-between">
+      <div><b>${info.day?info.day+"-й день цикла":"Цикл не настроен"}</b><div class="meta">${info.phase}</div></div>
+      <button type="button" class="btn sm ${info.isPeriodToday?"":"ghost"}" id="btnCycleEntryToggle" style="${info.isPeriodToday?"background:#e11d48;color:#fff":"color:#e11d48;background:color-mix(in srgb,#e11d48 14%,transparent)"}">
+        ${info.isPeriodToday?"✓ Сегодня есть":"Сегодня начались / идут"}
+      </button>
+    </div>
+    <div class="sub">${g.what}</div>`;
+  $("btnCycleEntryToggle").onclick=()=>togglePeriodDate(todayIso);
+}
+
+/* ---------- Smart Care & Notifications ---------- */
+function renderSmartCare(){
+  const p=prof(),h=new Date().getHours();
+  const slot=h<12?"утро":h<18?"день":"вечер";
+  const medsForSlot=(p.meds||[]).filter(m=>m.time===slot);
+  const todayEntries=mine().filter(e=>dkey(e.ts)===dkey(Date.now()));
+  const takenSet=new Set();
+  todayEntries.forEach(e=>{if(e.meds&&Array.isArray(e.meds.taken))e.meds.taken.forEach(x=>takenSet.add(x))});
+  const untaken=medsForSlot.filter(m=>!takenSet.has(m.name+" ("+m.time+")"));
+
+  const tips=[];
+  if(untaken.length){
+    tips.push(`💊 <b>Напоминание (${slot}):</b> не забудьте принять ${untaken.map(m=>esc(m.name)).join(", ")} по рекомендациям врача.`);
+  }
+  if(p.rxNotes&&p.rxNotes.length){
+    const latestRx=p.rxNotes[p.rxNotes.length-1].text.split("\n")[0].slice(0,110);
+    tips.push(`📋 <b>Из назначений врача:</b> ${esc(latestRx)}…`);
+  }
+  if(env){
+    const d=derived();
+    const hard=(d.dpNext!=null&&Math.abs(d.dpNext)>=8)||(d.dp24!=null&&Math.abs(d.dp24)>=8)||env.pm25>25||env.kpMax>=5;
+    if(hard){
+      tips.push(`🛡 <b>Профилактика на сегодня:</b> в прогнозе погодная или магнитная нагрузка. Выпейте стакан чистой воды, не пропускайте приём назначенных препаратов и измерьте давление утром и вечером.`);
+    }else{
+      tips.push(`💧 <b>Поддержка ровного дня:</b> пейте достаточно воды, сделайте короткую разминку и отметьте самочувствие на вкладке «Запись».`);
+    }
+  }
+
+  $("smartCareToday").innerHTML=`<div class="card rem-card stack" style="gap:8px">
+    <div class="rowx" style="justify-content:space-between">
+      <span class="k" style="font-size:12px;font-weight:600;color:var(--accent)">ПЕРСОНАЛЬНАЯ ЗАБОТА И НАПОМИНАНИЯ</span>
+      <button type="button" class="link" id="goNotifSettings">Настроить</button>
+    </div>
+    ${tips.map(t=>`<div style="font-size:14px">${t}</div>`).join("")}
+  </div>`;
+  $("goNotifSettings").onclick=()=>{show("settings");try{history.replaceState(null,"","#settings")}catch(e){}};
+}
+
+function sendSystemNotification(title,body){
+  if(!("Notification" in window))return;
+  if(Notification.permission==="granted"){
+    try{new Notification(title,{body,icon:"icon-192.png"})}catch(e){}
+  }
+}
+
+function checkScheduledReminders(){
+  const r=S.reminders||{};
+  const now=new Date(),today=isoDate(now);
+  if(!r.fired)r.fired={};
+  const hhmm=String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  const p=prof();
+
+  const fireOnce=(key,title,body)=>{
+    const fullKey=today+"_"+key;
+    if(r.fired[fullKey])return;
+    r.fired[fullKey]=true;saveS();
+    sendSystemNotification(title,body);
+  };
+
+  if(r.morn&&hhmm>=r.morn&&hhmm<="11:59"){
+    const meds=(p.meds||[]).filter(m=>m.time==="утро").map(m=>m.name).join(", ");
+    fireOnce("morn","Метеотрекер · Утро",meds?`Пора принять утренние лекарства (${meds}) и измерить давление.`:"Доброе утро! Измерьте давление и выпейте стакан воды.");
+  }
+  if(r.day&&hhmm>=r.day&&hhmm<="17:59"){
+    const meds=(p.meds||[]).filter(m=>m.time==="день").map(m=>m.name).join(", ");
+    if(meds||r.water)fireOnce("day","Метеотрекер · День",meds?`Напоминание: приём дневных лекарств (${meds}) и стакан воды.`:"Напоминание: выпейте стакан воды и проверьте самочувствие.");
+  }
+  if(r.eve&&hhmm>=r.eve&&hhmm<="23:30"){
+    const meds=(p.meds||[]).filter(m=>m.time==="вечер").map(m=>m.name).join(", ");
+    fireOnce("eve","Метеотрекер · Вечер",meds?`Пора принять вечерние лекарства (${meds}) и сделать вечерний замер давления.`:"Вечернее напоминание: измерьте давление и отметьте итоги дня.");
+  }
+  if(r.weather&&env){
+    const d=derived();
+    if((d.dpNext!=null&&Math.abs(d.dpNext)>=8)||env.kpMax>=5){
+      fireOnce("weather","Метеотрекер · Прогноз нагрузки","Ожидается резкий перепад давления или магнитная буря. Не забудьте таблетки по схеме врача и воду.");
+    }
+  }
+}
 
 /* ---------- Cloud Sync Logic ---------- */
 function setSyncStatus(txt){const el=$("syncStatus");if(el)el.textContent=txt}
+
+function packMeta(p){
+  return {
+    city:p.city||{name:"Астана",lat:51.1801,lon:71.446},
+    sex:p.sex||"",
+    cycleLen:p.cycleLen||28,
+    lastPeriod:p.lastPeriod||null,
+    periodDates:p.periodDates||[],
+    rxNotes:p.rxNotes||[]
+  };
+}
 
 async function syncFromCloud(){
   if(!sb||!sbUser)return;
@@ -530,7 +842,7 @@ async function syncFromCloud(){
       if(!isUuid(p.id)){
         const oldId=p.id;
         const {data:ins,error}=await sb.from("mt_profiles").insert({
-          owner_id:sbUser.id,name:p.name,city:p.city,meds:p.meds||[]
+          owner_id:sbUser.id,name:p.rawName||p.name,city:packMeta(p),meds:p.meds||[]
         }).select().single();
         if(!error&&ins){
           p.id=ins.id;
@@ -546,14 +858,23 @@ async function syncFromCloud(){
     if(pErr)throw pErr;
 
     if(cloudProfs&&cloudProfs.length){
-      S.profiles=cloudProfs.map(cp=>({
-        id:cp.id,
-        owner_id:cp.owner_id,
-        name:cp.owner_id===sbUser.id?cp.name:(cp.name+" (общий)"),
-        rawName:cp.name,
-        city:cp.city||{name:"Астана",lat:51.1801,lon:71.446},
-        meds:cp.meds||[]
-      }));
+      S.profiles=cloudProfs.map(cp=>{
+        const meta=cp.city||{};
+        const cityObj=meta.city?meta.city:(meta.name?meta:{name:"Астана",lat:51.1801,lon:71.446});
+        return {
+          id:cp.id,
+          owner_id:cp.owner_id,
+          name:cp.owner_id===sbUser.id?cp.name:(cp.name+" (общий)"),
+          rawName:cp.name,
+          sex:meta.sex||"",
+          cycleLen:meta.cycleLen||28,
+          lastPeriod:meta.lastPeriod||null,
+          periodDates:meta.periodDates||[],
+          rxNotes:meta.rxNotes||[],
+          city:cityObj,
+          meds:cp.meds||[]
+        };
+      });
       if(!S.profiles.some(p=>String(p.id)===String(S.cur)))S.cur=S.profiles[0].id;
       saveS();
     }
@@ -581,7 +902,7 @@ async function syncFromCloud(){
     sbShares=shData||[];
 
     setSyncStatus("Синхронизировано · "+new Date().toLocaleTimeString(LOC,{hour:"2-digit",minute:"2-digit"}));
-    renderMore();renderForm();renderHistory();renderReports();
+    renderSettings();renderCycleWidgets();renderSmartCare();renderForm();renderHistory();renderReports();renderAiView();
   }catch(err){
     setSyncStatus("Ошибка связи с облаком");
   }
@@ -590,7 +911,7 @@ async function syncFromCloud(){
 async function pushProfileUpdate(p){
   if(!sb||!sbUser||!p)return;
   if(p.owner_id&&p.owner_id!==sbUser.id)return;
-  await sb.from("mt_profiles").update({name:p.rawName||p.name,city:p.city,meds:p.meds||[]}).eq("id",p.id);
+  await sb.from("mt_profiles").update({name:p.rawName||p.name,city:packMeta(p),meds:p.meds||[]}).eq("id",p.id);
 }
 
 async function pushEntryCloud(e){
@@ -607,7 +928,7 @@ async function deleteEntryCloud(pid,ts){
   await sb.from("mt_entries").delete().eq("profile_id",pid).eq("ts",ts);
 }
 
-/* ---------- Moon (calculated, no network) ---------- */
+/* ---------- Moon ---------- */
 const SYN=29.530588853;
 function moon(ts){
   let age=((ts-Date.UTC(2000,0,6,18,14))/DAY)%SYN; if(age<0)age+=SYN;
@@ -615,7 +936,7 @@ function moon(ts){
   return {age,name:names.find(n=>age<n[0])[1],lit:Math.round((1-Math.cos(2*Math.PI*age/SYN))/2*100),full:Math.abs(age-SYN/2)<1.5};
 }
 
-/* ---------- Data loading ---------- */
+/* ---------- Weather Data ---------- */
 async function j(url){const r=await fetch(url);if(!r.ok)throw new Error(r.status);return r.json()}
 function parseKp(d){
   let rows=d; if(Array.isArray(d[0])){const h=d[0];rows=d.slice(1).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]])))}
@@ -647,9 +968,10 @@ async function load(){
       if(k.length)env.kpMax=Math.max(...k.map(x=>x.kp))}catch(e){}
   }
   renderToday();
+  renderSmartCare();
+  checkScheduledReminders();
 }
 
-/* ---------- Derived values ---------- */
 function derived(){
   const e=env,i=e.now,at=o=>{const k=i+o;return k>=0&&k<e.p.length?k:null};
   const d=(arr,o)=>at(o)==null?null:(o<0?arr[i]-arr[at(o)]:arr[at(o)]-arr[i]);
@@ -733,13 +1055,12 @@ function pressureChart(){
 }
 
 const data=()=>mine();
-const isEx=()=>false;
 
-/* ---------- Metrics and factors ---------- */
+/* ---------- Metrics, Factors & Patterns ---------- */
 const METRIC=[["Верхнее давление",e=>e.sys],["Нижнее давление",e=>e.dia],["Пульс",e=>e.pulse],["Головная боль",e=>e.head],["Самочувствие",e=>e.mood]];
 const ev=(e,k,f)=>e.env&&e.env[k]!=null?(f?f(e.env[k]):e.env[k]):null;
 const FACTOR=[["Атмосферное давление, мм",e=>ev(e,"p",x=>x*HPA2MM)],["Изменение давления за сутки, мм",e=>ev(e,"dp24",x=>x*HPA2MM)],["Температура, °C",e=>ev(e,"t")],
-  ["Влажность, %",e=>ev(e,"hum")],["PM2.5, мкг/м³",e=>ev(e,"pm25")],["Kp-индекс",e=>ev(e,"kp")],["Луна, % диска",e=>ev(e,"moonAge",a=>(1-Math.cos(2*Math.PI*a/SYN))/2*100)],["Сон, часов",e=>e.sleep],["Качество сна, 1–5",e=>e.sq||null]];
+  ["Влажность, %",e=>ev(e,"hum")],["PM2.5, мкг/м³",e=>ev(e,"pm25")],["Kp-индекс",e=>ev(e,"kp")],["Луна, % диска",e=>ev(e,"moonAge",a=>(1-Math.cos(2*Math.PI*a/SYN))/2*100)],["Сон, часов",e=>e.sleep],["Качество сна, 1–5",e=>e.sq||null],["День цикла",e=>e.cycleDay||null]];
 const has=(e,k,v)=>Array.isArray(e[k])&&e[k].includes(v);
 const PATTERN=[
   ["Резкий перепад давления за сутки (от 4 мм)",e=>ev(e,"dp24",x=>Math.abs(x*HPA2MM)>=4)],
@@ -752,12 +1073,13 @@ const PATTERN=[
   ["Лекарства приняты не все",e=>e.meds&&e.meds.total?e.meds.taken.length<e.meds.total:null],
   ["Был кофе",e=>e.hab?has(e,"hab","кофе"):null],
   ["Солёная еда",e=>e.hab?has(e,"hab","солёное"):null],
-  ["Сильный стресс",e=>e.stress==null?null:e.stress===2]
+  ["Сильный стресс",e=>e.stress==null?null:e.stress===2],
+  ["Дни менструации или ПМС",e=>e.cycleDay!=null?(e.cycleDay<=5||e.cycleDay>=24):null]
 ];
 function patterns(list){
   const bp=list.filter(e=>e.sys);
   return PATTERN.map(([name,f])=>{const y=[],n=[];bp.forEach(e=>{const r=f(e);if(r===true)y.push(e.sys);else if(r===false)n.push(e.sys)});
-    return {name,ny:y.length,nn:n.length,diff:y.length>=5&&n.length>=5?avg(y)-avg(n):null}});
+    return {name,ny:y.length,nn:n.length,diff:y.length>=3&&n.length>=3?avg(y)-avg(n):null}});
 }
 function dayScore(es){
   let s=null;
@@ -784,11 +1106,10 @@ function lineChart(a,fa,fb){
     if(xb.length)g+=`<text x="${W-R+6}" y="${y+4}" font-size="11" fill="var(--muted)">${fmt(b1,Math.abs(bhi-blo)<10?1:0)}</text>`}
   g+=`<text x="${X(0)}" y="${H-8}" font-size="11" fill="var(--muted)">${dshort(a[0].ts)}</text><text x="${X(n-1)}" y="${H-8}" font-size="11" fill="var(--muted)" text-anchor="end">${dshort(a[n-1].ts)}</text>`;
   const dots=va.map((x,i)=>x==null?"":`<circle cx="${X(i).toFixed(1)}" cy="${YA(x).toFixed(1)}" r="3" fill="var(--accent)"/>`).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График сравнения самочувствия и фактора">${g}${xb.length>1?line(vb,YB,"var(--muted)",true):""}${line(va,YA,"var(--accent)")}${dots}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График сравнения">${g}${xb.length>1?line(vb,YB,"var(--muted)",true):""}${line(va,YA,"var(--accent)")}${dots}</svg>`;
 }
 function renderHistory(){
-  const list=data(),ex=isEx();
-  document.querySelectorAll(".ex").forEach(b=>b.classList.toggle("hide",!ex));
+  const list=data(),p=prof();
   const A=METRIC[$("cmpA").value||0],B=FACTOR[$("cmpB").value||0];
   $("lgA").textContent=A[0];$("lgB").textContent=B[0];
   $("cmp").innerHTML=lineChart(list.slice(-40),A[1],B[1]);
@@ -797,96 +1118,67 @@ function renderHistory(){
   $("calT").textContent=dstr(first,"month");
   let c=["пн","вт","ср","чт","пт","сб","вс"].map(d=>`<div class="h">${d}</div>`).join("")+"<div class=\"e\"></div>".repeat(off);
   const tk=dkey(Date.now());
-  for(let d=1;d<=nd;d++){const k=y+"-"+(m+1)+"-"+d,s=byDay[k]?dayScore(byDay[k]):null;c+=`<div class="${s||""}${k===tk?" today":""}">${d}</div>`}
+  const pDates=p&&p.sex==="f"&&Array.isArray(p.periodDates)?p.periodDates:[];
+  for(let d=1;d<=nd;d++){
+    const k=y+"-"+(m+1)+"-"+d;
+    const iso=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const s=byDay[k]?dayScore(byDay[k]):null;
+    const isPer=pDates.includes(iso);
+    c+=`<div class="${s||""}${k===tk?" today":""}${isPer?" period":""}">${d}</div>`;
+  }
   $("cal").innerHTML=c;
   $("list").innerHTML=!list.length?`<div class="sub">Записей пока нет. Сделайте первую на вкладке «Запись».</div>`:list.slice().reverse().slice(0,60).map(e=>{
     const dt=dstr(e.ts,"dt"),v=e.env||{},m=[],en=[];
     if(e.tod)m.push(e.tod);if(e.pulse)m.push("пульс "+e.pulse);if(e.head)m.push("голова "+e.head+"/10");if(e.mood!=null)m.push("самочувствие "+e.mood+"/10");
+    if(e.cycleDay)m.push(e.cycleDay+"-й д. цикла");
     if(e.sleep)m.push("сон "+fmt(+e.sleep,1)+" ч");if(e.sq)m.push("качество сна "+e.sq+"/5");if(e.water)m.push("вода "+e.water);
     if(e.meds&&e.meds.total)m.push("лекарства "+e.meds.taken.length+" из "+e.meds.total);
     const tags=[...(e.sym||[]),...(e.hab||[])];if(e.stress===2)tags.push("сильный стресс");
     if(v.p)en.push(fmt(v.p*HPA2MM)+" мм");if(v.dp24!=null)en.push("за сутки "+sign(v.dp24*HPA2MM));if(v.t!=null)en.push(fmt(v.t)+"°");if(v.pm25!=null)en.push("PM2.5 "+fmt(v.pm25));if(v.kp!=null)en.push("Kp "+fmt(v.kp,1));
-    return `<div class="entry"><div class="top"><span class="bp">${e.sys&&e.dia?e.sys+"/"+e.dia:"без давления"}</span><span class="meta">${dt}${e.ex?" · пример":""}</span></div>
+    return `<div class="entry"><div class="top"><span class="bp">${e.sys&&e.dia?e.sys+"/"+e.dia:"без давления"}</span><span class="meta">${dt}</span></div>
       <div class="meta">${m.join(" · ")}</div>${tags.length?`<div class="meta">${esc(tags.join(", "))}</div>`:""}${en.length?`<div class="meta">Среда: ${en.join(" · ")}</div>`:""}${e.note?`<div class="nt">${esc(e.note)}</div>`:""}
-      ${e.ex?"":`<button type="button" class="link" data-del="${e.ts}">Удалить</button>`}</div>`}).join("");
+      <button type="button" class="link" data-del="${e.ts}">Удалить</button></div>`}).join("");
 }
 
-/* ---------- Reports & AI Assistant ---------- */
+/* ---------- Reports & PDF Print ---------- */
 function doctorRows(){return data().filter(e=>e.sys&&e.dia&&e.ts>Date.now()-28*DAY)}
-function buildAiSummary(){
-  const p=prof(),list=data().filter(e=>e.ts>Date.now()-28*DAY);
-  if(!list.length)return null;
-  const lines=[`Профиль: ${p.rawName||p.name}, город: ${p.city.name}. Записей за 28 дней: ${list.length}.`];
-  if(p.meds&&p.meds.length)lines.push("Список лекарств: "+p.meds.map(m=>`${m.name} (${m.time})`).join(", "));
-  lines.push("\nЗаписи (дата, время суток, давление, пульс, самочувствие/10, головная боль/10, сон, симптомы, среда):");
-  list.slice(-45).forEach(e=>{
-    const v=e.env||{},parts=[new Date(e.ts).toLocaleDateString("ru-RU"),e.tod||""];
-    if(e.sys&&e.dia)parts.push(`АД ${e.sys}/${e.dia}`);
-    if(e.pulse)parts.push(`пульс ${e.pulse}`);
-    if(e.mood!=null)parts.push(`самочувствие ${e.mood}/10`);
-    if(e.head)parts.push(`головная боль ${e.head}/10`);
-    if(e.sleep)parts.push(`сон ${e.sleep}ч`+(e.sq?` (качество ${e.sq}/5)`:""));
-    if(e.sym&&e.sym.length)parts.push(`симптомы: ${e.sym.join(",")}`);
-    if(e.hab&&e.hab.length)parts.push(`факторы: ${e.hab.join(",")}`);
-    if(e.meds&&e.meds.total)parts.push(`лекарства ${e.meds.taken.length}/${e.meds.total}`);
-    const envP=[];
-    if(v.p)envP.push(`атм.давл ${Math.round(v.p*HPA2MM)}мм`);
-    if(v.dp24!=null)envP.push(`перепад 24ч ${(v.dp24*HPA2MM).toFixed(1)}мм`);
-    if(v.t!=null)envP.push(`t ${Math.round(v.t)}°`);
-    if(v.pm25!=null)envP.push(`PM2.5 ${Math.round(v.pm25)}`);
-    if(v.kp!=null)envP.push(`Kp ${v.kp.toFixed(1)}`);
-    if(envP.length)parts.push("["+envP.join(", ")+"]");
-    if(e.note)parts.push(`заметка: ${e.note}`);
-    lines.push("- "+parts.join(" | "));
-  });
-  return lines.join("\n");
+
+function printViewAsPdf(viewId){
+  const el=$(viewId);
+  el.classList.add("print-target");
+  window.print();
+  setTimeout(()=>el.classList.remove("print-target"),500);
 }
 
-$("aiRun").addEventListener("click",async()=>{
-  const summary=buildAiSummary();
-  const out=$("aiOut"),btn=$("aiRun");
-  out.classList.remove("hide");
-  if(!summary){out.textContent="Сначала сделайте хотя бы одну-две записи на вкладке «Запись», чтобы ИИ было что анализировать.";return}
-  if(!sb){out.textContent="Нет подключения к серверу.";return}
-  btn.disabled=true;
-  out.textContent="Анализирую дневник…";
-  try{
-    const {data,error}=await sb.functions.invoke("ai-analyze",{body:{summary,lang:LANG}});
-    if(error)throw error;
-    if(data&&data.error)throw new Error(data.error);
-    out.textContent=(data&&data.text)||"Не удалось получить ответ.";
-  }catch(err){
-    out.textContent="Не удалось получить ответ ИИ: "+(err.message||"проверьте соединение или баланс OpenAI.");
-  }finally{
-    btn.disabled=false;
-  }
+$("repPeriodTabs").addEventListener("click",ev=>{
+  const d=Number(ev.target.dataset.d);if(!d)return;
+  repDays=d;
+  [...$("repPeriodTabs").children].forEach(b=>b.classList.toggle("on",Number(b.dataset.d)===d));
+  renderReports();
 });
 
-$("aiCopyPrompt").addEventListener("click",()=>{
-  const summary=buildAiSummary();
-  if(!summary){
-    $("aiOut").classList.remove("hide");
-    $("aiOut").textContent="Пока нет записей для сводки.";
-    return;
-  }
-  const prompt="Проанализируй мой дневник давления, самочувствия и погоды за последние 28 дней. Выдели 3–4 закономерности по цифрам и составь список вопросов для моего лечащего врача (без постановки диагнозов и назначения лечения):\n\n"+summary;
-  copyOut(prompt,$("aiPromptOut"),$("aiCopyPrompt"));
+$("patAiBtn").addEventListener("click",()=>{
+  show("ai");
+  try{history.replaceState(null,"","#ai")}catch(e){}
+  askAiQuestion("Разбери найденные закономерности по моим записям давления, сна, цикла и погоды. Что из этого важнее всего и как мне сгладить перепады?");
 });
+
+$("docPdfBtn").addEventListener("click",()=>printViewAsPdf("v-reports"));
 
 function renderReports(){
-  const list=data(),wk=list.filter(e=>e.ts>Date.now()-7*DAY),bp=wk.filter(e=>e.sys&&e.dia);
+  const list=data(),wk=list.filter(e=>e.ts>Date.now()-repDays*DAY),bp=wk.filter(e=>e.sys&&e.dia);
   const worst=bp.slice().sort((a,b)=>b.sys-a.sys)[0],md=wk.filter(e=>e.meds&&e.meds.total);
   $("week").innerHTML=[
     tile("Среднее давление",bp.length?fmt(avg(bp.map(e=>e.sys)))+"/"+fmt(avg(bp.map(e=>e.dia))):"—","",`замеров: ${bp.length}`),
     tile("Средний пульс",fmt(avg(wk.filter(e=>e.pulse).map(e=>e.pulse))),"уд/мин",""),
-    tile("Самое высокое",worst?worst.sys+"/"+worst.dia:"—","",worst?dshort(worst.ts)+(worst.env&&worst.env.dp24!=null?` · давление за сутки ${sign(worst.env.dp24*HPA2MM)} мм`:""):""),
+    tile("Самое высокое",worst?worst.sys+"/"+worst.dia:"—","",worst?dshort(worst.ts)+(worst.env&&worst.env.dp24!=null?` · за сутки ${sign(worst.env.dp24*HPA2MM)} мм`:""):""),
     tile("Самочувствие",fmt(avg(wk.filter(e=>e.mood!=null).map(e=>e.mood)),1),"из 10",`записей: ${wk.length}`),
-    tile("Лекарства",md.length?fmt(md.filter(e=>e.meds.taken.length>=e.meds.total).length/md.length*100):"—","% приёмов",md.length?"все отмечены как принятые":"нет отметок"),
+    tile("Лекарства",md.length?fmt(md.filter(e=>e.meds.taken.length>=e.meds.total).length/md.length*100):"—","% приёмов",md.length?"отмечены принятыми":"нет отметок"),
     tile("Головная боль",String(wk.filter(e=>e.head>=4).length),"раз",`от 4 из 10`),
     tile("Сон в среднем",fmt(avg(wk.filter(e=>e.sleep).map(e=>e.sleep)),1),"ч",`ночей: ${wk.filter(e=>e.sleep).length}`)
   ].join("");
   const nb=list.filter(e=>e.sys).length;
-  $("pat").innerHTML=nb<14?`<div class="sub">Нужно минимум 14 записей с давлением. Сейчас: ${nb}.</div>`:
+  $("pat").innerHTML=nb<6?`<div class="sub">Нужно минимум 6 записей с давлением для поиска связей. Сейчас: ${nb}.</div>`:
     patterns(list).map(p=>`<div class="pat"><span>${p.name}<div class="meta">да: ${p.ny} · нет: ${p.nn}</div></span><b>${p.diff==null?"мало данных":"верхнее "+sign(p.diff,0)}</b></div>`).join("");
   const dr=doctorRows(),mo=dr.filter(e=>e.tod==="утро"),evn=dr.filter(e=>e.tod==="вечер"),pair=a=>a.length?fmt(avg(a.map(e=>e.sys)))+"/"+fmt(avg(a.map(e=>e.dia))):"—";
   $("docSum").innerHTML=`<div class="meta">Среднее: <b>${pair(dr)}</b> · утро ${pair(mo)} · вечер ${pair(evn)} · замеров ${dr.length}</div>`;
@@ -900,6 +1192,245 @@ $("docCopy").addEventListener("click",()=>{
   copyOut(txt,$("docOut"),$("docCopy"));
 });
 
+/* ---------- Dedicated AI View (Photo Upload, Period Reports, Q&A, PDF) ---------- */
+function compressImageFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onerror=reject;
+      img.onload=()=>{
+        const maxSide=1200;
+        let w=img.width,h=img.height;
+        if(w>maxSide||h>maxSide){
+          if(w>h){h=Math.round(h*maxSide/w);w=maxSide}
+          else{w=Math.round(w*maxSide/h);h=maxSide}
+        }
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",0.82));
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleSelectedPhoto(file){
+  if(!file)return;
+  try{
+    const dataUrl=await compressImageFile(file);
+    pendingImageDataUrl=dataUrl;
+    $("photoPreviewImg").src=dataUrl;
+    $("photoPreviewBox").classList.remove("hide");
+  }catch(e){
+    alert("Не удалось прочитать изображение.");
+  }
+}
+
+$("btnCam").addEventListener("click",()=>$("inpCam").click());
+$("btnGal").addEventListener("click",()=>$("inpGal").click());
+$("inpCam").addEventListener("change",ev=>{handleSelectedPhoto(ev.target.files[0]);ev.target.value=""});
+$("inpGal").addEventListener("change",ev=>{handleSelectedPhoto(ev.target.files[0]);ev.target.value=""});
+$("photoClear").addEventListener("click",()=>{
+  pendingImageDataUrl=null;
+  $("photoPreviewBox").classList.add("hide");
+  $("photoPreviewImg").src="";
+});
+
+$("clearRxBtn").addEventListener("click",()=>{
+  const p=prof();p.rxNotes=[];saveS();pushProfileUpdate(p);renderAiView();renderSmartCare();
+});
+
+$("btnAnalyzePhoto").addEventListener("click",async()=>{
+  if(!pendingImageDataUrl)return;
+  const imgData=pendingImageDataUrl;
+  pendingImageDataUrl=null;
+  $("photoPreviewBox").classList.add("hide");
+  await askAiQuestion("Расшифруй это фото (назначение врача, рецепт, лекарство или показания прибора). Выпиши названия препаратов, дозировки, режим приёма и важные рекомендации простым языком.",imgData,true);
+});
+
+$("aiPeriodTabs").addEventListener("click",ev=>{
+  const d=Number(ev.target.dataset.d);if(!d)return;
+  aiDays=d;
+  [...$("aiPeriodTabs").children].forEach(b=>b.classList.toggle("on",Number(b.dataset.d)===d));
+});
+
+function buildContextForAi(days=28){
+  const p=prof();
+  const cutoff=Date.now()-days*DAY;
+  const list=data().filter(e=>e.ts>cutoff);
+  const sexStr=p.sex==="f"?"женский":p.sex==="m"?"мужской":"не указан";
+  const periodLabel=days===1?"за сегодня (1 день)":days===7?"за неделю (7 дней)":days===30?"за месяц (30 дней)":"за год (365 дней)";
+  const lines=[`Профиль: ${p.rawName||p.name}, пол: ${sexStr}, город: ${p.city.name}. Период анализа: ${periodLabel}.`];
+  if(p.sex==="f"){
+    const ci=getCycleInfo(p);
+    lines.push(`Женский цикл: длина ${p.cycleLen||28} дн., текущий день: ${ci.day||"не задан"} (${ci.phase}).`);
+  }
+  if(env){
+    const d=derived();
+    lines.push(`Погода сейчас: давление ${Math.round(d.p*HPA2MM)} мм рт. ст. (изменение за 24ч ${d.dp24!=null?(d.dp24*HPA2MM).toFixed(1):"?"} мм), температура ${Math.round(d.t)}°C, влажность ${env.hum}%, PM2.5 ${env.pm25}, Kp ${env.kp}.`);
+  }
+  if(p.meds&&p.meds.length)lines.push("Лекарства в дневнике: "+p.meds.map(m=>`${m.name} (${m.time})`).join(", "));
+  if(p.rxNotes&&p.rxNotes.length){
+    lines.push("\nСохранённые назначения/рекомендации врача (из фото):");
+    p.rxNotes.forEach((r,idx)=>lines.push(`${idx+1}. [${r.date}] ${r.text}`));
+  }
+
+  // Computed patterns summary
+  const pats=patterns(data()).filter(x=>x.diff!=null);
+  if(pats.length){
+    lines.push("\nВычисленные закономерности по всем записям (разница верхнего АД):");
+    pats.forEach(x=>lines.push(`- ${x.name}: ${x.diff>0?"+":""}${Math.round(x.diff)} мм (да: ${x.ny}, нет: ${x.nn})`));
+  }
+
+  if(!list.length){
+    lines.push(`\nЗаписей в дневнике за выбранный период (${periodLabel}) пока нет.`);
+  }else{
+    lines.push(`\nЗаписи за период (${list.length} шт.):`);
+    list.slice(-60).forEach(e=>{
+      const v=e.env||{},parts=[new Date(e.ts).toLocaleDateString("ru-RU"),e.tod||""];
+      if(e.sys&&e.dia)parts.push(`АД ${e.sys}/${e.dia}`);
+      if(e.pulse)parts.push(`пульс ${e.pulse}`);
+      if(e.mood!=null)parts.push(`самочувствие ${e.mood}/10`);
+      if(e.head)parts.push(`головная боль ${e.head}/10`);
+      if(e.cycleDay)parts.push(`день цикла ${e.cycleDay}${e.cyclePhase?" ("+e.cyclePhase+")":""}`);
+      if(e.sleep)parts.push(`сон ${e.sleep}ч`+(e.sq?` (качество ${e.sq}/5)`:""));
+      if(e.sym&&e.sym.length)parts.push(`симптомы: ${e.sym.join(",")}`);
+      if(e.hab&&e.hab.length)parts.push(`факторы: ${e.hab.join(",")}`);
+      if(e.meds&&e.meds.total)parts.push(`лекарства ${e.meds.taken.length}/${e.meds.total}`);
+      const envP=[];
+      if(v.p)envP.push(`атм.давл ${Math.round(v.p*HPA2MM)}мм`);
+      if(v.dp24!=null)envP.push(`перепад 24ч ${(v.dp24*HPA2MM).toFixed(1)}мм`);
+      if(v.t!=null)envP.push(`t ${Math.round(v.t)}°`);
+      if(v.pm25!=null)envP.push(`PM2.5 ${Math.round(v.pm25)}`);
+      if(v.kp!=null)envP.push(`Kp ${v.kp.toFixed(1)}`);
+      if(envP.length)parts.push("["+envP.join(", ")+"]");
+      if(e.note)parts.push(`заметка: ${e.note}`);
+      lines.push("- "+parts.join(" | "));
+    });
+  }
+  return lines.join("\n");
+}
+
+function renderAiView(){
+  const p=prof();
+  const rx=p.rxNotes||[];
+  $("savedRxBox").classList.toggle("hide",!rx.length);
+  $("savedRxList").innerHTML=rx.map((r,i)=>`<div class="rx-item"><div class="rowx" style="justify-content:space-between"><span class="meta">${r.date}</span><button type="button" class="link" data-rxdel="${i}">Удалить</button></div><div>${esc(r.text)}</div></div>`).join("");
+
+  const base=[
+    "Что сделать сегодня, чтобы день прошёл ровно и без скачков?",
+    "Разбери мои закономерности и дай советы",
+    "Какие вопросы задать врачу на приёме?"
+  ];
+  if(p&&p.sex==="f"){
+    const ci=getCycleInfo(p);
+    base.unshift(ci&&ci.day?`Гид на ${ci.day}-й день цикла (${ci.phase}): что учесть?`:"Как цикл влияет на моё давление?");
+  }
+  $("qaPresets").innerHTML=base.map(q=>`<button type="button">${esc(q)}</button>`).join("");
+}
+
+$("savedRxList").addEventListener("click",ev=>{
+  const i=ev.target.dataset.rxdel;if(i==null)return;
+  const p=prof();p.rxNotes.splice(+i,1);saveS();pushProfileUpdate(p);renderAiView();renderSmartCare();
+});
+
+$("qaPresets").addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  askAiQuestion(b.textContent);
+});
+
+async function askAiQuestion(qText,imageDataUrl=null,saveAsRx=false){
+  const q=(qText||$("qaInput").value).trim();
+  if(!q&&!imageDataUrl)return;
+  const finalQ=q||"Проанализируй это фото в контексте моего здоровья и назначений.";
+  $("qaInput").value="";
+  const imgToSend=imageDataUrl||pendingImageDataUrl;
+  if(pendingImageDataUrl){
+    pendingImageDataUrl=null;
+    $("photoPreviewBox").classList.add("hide");
+  }
+
+  const box=$("qaHist");
+  box.classList.remove("hide");
+  const qDiv=document.createElement("div");
+  qDiv.className="qa-msg q";
+  qDiv.textContent=(imgToSend?"📷 [Фото] ":"")+finalQ;
+  const aDiv=document.createElement("div");
+  aDiv.className="qa-msg a";
+  aDiv.textContent=imgToSend?"Изучаю фото и сопоставляю с вашим дневником…":"Думаю…";
+  box.appendChild(qDiv);
+  box.appendChild(aDiv);
+  box.scrollTop=box.scrollHeight;
+
+  if(!sb){aDiv.textContent="Нет подключения к серверу.";return}
+  $("qaSend").disabled=true;
+  try{
+    const ctx=buildContextForAi(aiDays);
+    const prompt=`Контекст пользователя и дневника:\n${ctx}\n\nЗапрос пользователя: ${finalQ}\n\nОтветь тепло, структурно и по делу (без постановки диагнозов и самостоятельного назначения новых лекарств; опирайся на записи дневника и сохранённые назначения врача).`;
+    const body={summary:prompt,lang:LANG};
+    if(imgToSend)body.image=imgToSend;
+    const {data,error}=await sb.functions.invoke("ai-analyze",{body});
+    if(error)throw error;
+    if(data&&data.error)throw new Error(data.error);
+    const reply=(data&&data.text)||"Не удалось получить ответ.";
+    aDiv.textContent=reply;
+
+    if(saveAsRx&&reply){
+      const p=prof();
+      if(!Array.isArray(p.rxNotes))p.rxNotes=[];
+      p.rxNotes.push({date:dstr(Date.now(),"short"),text:reply.slice(0,1200)});
+      saveS();pushProfileUpdate(p);renderAiView();renderSmartCare();
+    }
+  }catch(err){
+    aDiv.textContent="Не удалось получить ответ: "+(err.message||"проверьте соединение.");
+  }finally{
+    $("qaSend").disabled=false;
+    box.scrollTop=box.scrollHeight;
+  }
+}
+
+$("qaSend").addEventListener("click",()=>askAiQuestion());
+$("qaInput").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();askAiQuestion()}});
+
+$("aiRun").addEventListener("click",async()=>{
+  const out=$("aiOut"),btn=$("aiRun"),copyBtn=$("aiCopyRespBtn");
+  out.classList.remove("hide");
+  if(!sb){out.textContent="Нет подключения к серверу.";return}
+  btn.disabled=true;
+  out.textContent="Формирую подробный отчёт ИИ…";
+  try{
+    const summary=buildContextForAi(aiDays);
+    const prompt=`Составь подробный структурированный отчёт и практические рекомендации по дневнику:\n${summary}\n\nВключи:\n1. Сводку показателей (давление, пульс, сон, самочувствие) за выбранный период.\n2. Как погода, цикл и режим влияли на состояние (закономерности).\n3. Практические шаги на ближайшие дни с учётом назначений врача, чтобы самочувствие было стабильным.\n4. 3–4 конкретных вопроса для врача.`;
+    const {data,error}=await sb.functions.invoke("ai-analyze",{body:{summary:prompt,lang:LANG}});
+    if(error)throw error;
+    if(data&&data.error)throw new Error(data.error);
+    out.textContent=(data&&data.text)||"Не удалось получить ответ.";
+    copyBtn.classList.remove("hide");
+  }catch(err){
+    out.textContent="Не удалось получить ответ ИИ: "+(err.message||"проверьте соединение или баланс OpenAI.");
+  }finally{
+    btn.disabled=false;
+  }
+});
+
+$("aiPdfBtn").addEventListener("click",()=>{
+  if($("aiOut").classList.contains("hide")&&$("qaHist").classList.contains("hide")){
+    alert("Сначала нажмите «Сделать отчёт ИИ» или задайте вопрос в чате, чтобы было что сохранить в PDF.");
+    return;
+  }
+  printViewAsPdf("v-ai");
+});
+
+$("aiCopyRespBtn").addEventListener("click",()=>{
+  const txt=$("aiOut").textContent;
+  if(!txt)return;
+  try{navigator.clipboard.writeText(txt).then(()=>{$("aiCopyRespBtn").textContent="Ответ скопирован!"})}catch(e){}
+});
+
 /* ---------- Entry form ---------- */
 const chip=(name,v,nt)=>`<label class="chip"><input type="checkbox" name="${name}" value="${esc(v)}"><span${nt?' class="nt"':""}>${esc(v)}</span></label>`;
 const picked=name=>[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);
@@ -908,13 +1439,19 @@ function renderForm(){
   $("symBox").innerHTML=SYM.map(s=>chip("sym",s)).join("");
   $("habBox").innerHTML=HAB.map(s=>chip("hab",s)).join("");
   const m=prof().meds;
-  $("medBox").innerHTML=m.length?m.map(x=>chip("med",x.name+" ("+x.time+")",true)).join(""):`<span class="sub">Список лекарств пуст. Добавьте их на вкладке «Ещё».</span>`;
+  $("medBox").innerHTML=m.length?m.map(x=>chip("med",x.name+" ("+x.time+")",true)).join(""):`<span class="sub">Список лекарств пуст. Добавьте их в настройках (шестерёнка сверху).</span>`;
 }
 function addEntry(e){
-  e.ts=Date.now();e.pid=prof().id;e.env=snapshot();ALL.push(e);
-  const ok=saveE();renderHistory();renderReports();
+  const p=prof();
+  e.ts=Date.now();e.pid=p.id;e.env=snapshot();
+  if(p.sex==="f"){
+    const ci=getCycleInfo(p,e.ts);
+    if(ci&&ci.day){e.cycleDay=ci.day;e.cyclePhase=ci.phase}
+  }
+  ALL.push(e);
+  const ok=saveE();renderHistory();renderReports();renderSmartCare();
   pushEntryCloud(e);
-  return ok?"Запись сохранена.":"Запись видна сейчас, но телефон не разрешил её сохранить. Скопируйте записи на вкладке «Ещё».";
+  return ok?"Запись сохранена.":"Запись видна сейчас, но телефон не разрешил её сохранить.";
 }
 document.querySelector(".quick").addEventListener("click",ev=>{const q=ev.target.dataset.q;if(!q)return;
   const h=new Date().getHours();$("qsaved").textContent=addEntry({quick:true,mood:+q,tod:h<12?"утро":h<18?"день":"вечер"})});
@@ -933,12 +1470,27 @@ $("f").addEventListener("submit",ev=>{
   ["sys","dia","sys2","dia2","pulse","bed","wake","sq","water","note"].forEach(id=>$(id).value="");$("head").value=0;$("mood").value=5;$("headV").textContent="0";$("moodV").textContent="5";$("stress").value="0";
   renderForm();
 });
-$("list").addEventListener("click",ev=>{const t=ev.target.dataset.del;if(!t)return;const pid=prof().id;ALL=ALL.filter(e=>!(String(e.pid)===String(pid)&&String(e.ts)===t));saveE();deleteEntryCloud(pid,Number(t));renderHistory();renderReports()});
+$("list").addEventListener("click",ev=>{const t=ev.target.dataset.del;if(!t)return;const pid=prof().id;ALL=ALL.filter(e=>!(String(e.pid)===String(pid)&&String(e.ts)===t));saveE();deleteEntryCloud(pid,Number(t));renderHistory();renderReports();renderSmartCare()});
 ["cmpA","cmpB"].forEach(id=>$(id).addEventListener("change",renderHistory));
 $("calPrev").addEventListener("click",()=>{calM=new Date(calM.getFullYear(),calM.getMonth()-1,1);renderHistory()});
 $("calNext").addEventListener("click",()=>{calM=new Date(calM.getFullYear(),calM.getMonth()+1,1);renderHistory()});
 
-/* ---------- Auth & Share Events ---------- */
+/* ---------- Auth Gate & Share Events ---------- */
+let gateMode="in", gateSex="f";
+$("gTabs").addEventListener("click",ev=>{
+  const m=ev.target.dataset.m;if(!m)return;
+  gateMode=m;
+  [...$("gTabs").children].forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("gRegFields").classList.toggle("hide",m!=="up");
+  $("gSubmit").textContent=m==="in"?"Войти":"Создать аккаунт";
+  $("gMsg").textContent="";
+});
+$("gSexSeg").addEventListener("click",ev=>{
+  const s=ev.target.dataset.sex;if(!s)return;
+  gateSex=s;
+  [...$("gSexSeg").children].forEach(b=>b.classList.toggle("on",b.dataset.sex===s));
+});
+
 function renderAuth(){
   const loggedIn=!!sbUser;
   $("authLoggedOut").classList.toggle("hide",loggedIn);
@@ -957,7 +1509,7 @@ function renderAuth(){
   }
 }
 
-async function doAuth(mode,email,password,msgEl){
+async function doAuth(mode,email,password,msgEl,extraName,extraSex){
   if(!sb)return;
   if(!email||password.length<6){msgEl.textContent="Укажите почту и пароль (от 6 символов).";return}
   msgEl.textContent=mode==="in"?"Вхожу…":"Создаю аккаунт…";
@@ -965,27 +1517,27 @@ async function doAuth(mode,email,password,msgEl){
   if(res.error){msgEl.textContent="Ошибка: "+res.error.message;return}
   msgEl.textContent="";
   sbUser=res.data.user;
+  if(mode==="up"){
+    const p=prof();
+    if(extraName)p.name=p.rawName=extraName;
+    if(extraSex)p.sex=extraSex;
+  }
   S.skipGate=false;saveS();
   renderAuth();
   await syncFromCloud();
 }
 
-$("gSignIn").addEventListener("click",()=>doAuth("in",$("gEmail").value.trim(),$("gPass").value,$("gMsg")));
-$("gSignUp").addEventListener("click",()=>doAuth("up",$("gEmail").value.trim(),$("gPass").value,$("gMsg")));
+$("gSubmit").addEventListener("click",()=>doAuth(gateMode,$("gEmail").value.trim(),$("gPass").value,$("gMsg"),$("gName").value.trim(),gateSex));
 $("gSkip").addEventListener("click",()=>{S.skipGate=true;saveS();$("authGate").classList.add("hide")});
-
 $("btnSignIn").addEventListener("click",()=>doAuth("in",$("authEmail").value.trim(),$("authPass").value,$("authMsg")));
 $("btnSignUp").addEventListener("click",()=>doAuth("up",$("authEmail").value.trim(),$("authPass").value,$("authMsg")));
-
 $("btnSignOut").addEventListener("click",async()=>{
   if(!sb)return;
   await sb.auth.signOut();
   sbUser=null;sbShares=[];S.skipGate=false;saveS();renderAuth();
   $("authGate").classList.remove("hide");
 });
-
 $("btnSyncNow").addEventListener("click",()=>syncFromCloud());
-
 $("btnShareAdd").addEventListener("click",async()=>{
   if(!sb||!sbUser)return;
   const email=$("shareEmail").value.trim().toLowerCase();
@@ -997,24 +1549,65 @@ $("btnShareAdd").addEventListener("click",async()=>{
   $("shareEmail").value="";$("shareMsg").textContent="Доступ открыт!";
   await syncFromCloud();
 });
-
 $("shareList").addEventListener("click",async ev=>{
   const id=ev.target.dataset.unshare;if(!id||!sb)return;
   await sb.from("mt_shares").delete().eq("id",id);
   await syncFromCloud();
 });
 
-/* ---------- Settings ---------- */
+/* ---------- Settings & Notification Controls ---------- */
 const CITIES=[["Астана",51.1801,71.446],["Алматы",43.2567,76.9286],["Шымкент",42.3,69.6],["Караганда",49.8047,73.1094],["Актобе",50.2839,57.167],["Тараз",42.9,71.3667],["Павлодар",52.2873,76.9674],["Усть-Каменогорск",49.9483,82.6275],["Семей",50.4111,80.2275],["Атырау",47.1167,51.8833],["Костанай",53.2144,63.6246],["Кызылорда",44.8528,65.5092],["Уральск",51.2333,51.3667],["Петропавловск",54.8753,69.1628],["Актау",43.65,51.1667],["Темиртау",50.0549,72.9646],["Туркестан",43.2973,68.2518],["Кокшетау",53.2833,69.3833],["Талдыкорган",45.0167,78.3667],["Экибастуз",51.7298,75.3266],["Москва",55.7558,37.6173],["Санкт-Петербург",59.9343,30.3351],["Ташкент",41.2995,69.2401],["Бишкек",42.8746,74.5698]];
-function renderMore(){
+
+function updateNotifStatus(){
+  if(!("Notification" in window)){$("notifPermStatus").textContent="Браузер не поддерживает системные уведомления, но подсказки работают внутри приложения.";return}
+  const perm=Notification.permission;
+  $("notifPermStatus").textContent=perm==="granted"?"✓ Системные уведомления разрешены":perm==="denied"?"Уведомления заблокированы в настройках браузера/iPhone":"Нажмите кнопку выше, чтобы разрешить всплывающие напоминания";
+}
+
+$("btnNotifPerm").addEventListener("click",async()=>{
+  if(!("Notification" in window))return;
+  await Notification.requestPermission();
+  updateNotifStatus();
+});
+$("btnTestNotif").addEventListener("click",()=>{
+  if("Notification" in window&&Notification.permission==="granted"){
+    sendSystemNotification("Метеотрекер · Напоминание","Пора выпить стакан воды и проверить самочувствие!");
+  }else{
+    alert("Напоминание: пора выпить стакан воды, принять назначенные лекарства и проверить давление!");
+  }
+});
+["remWeather","remWater","remMorn","remDay","remEve"].forEach(id=>{
+  $(id).addEventListener("change",()=>{
+    S.reminders.weather=$("remWeather").checked;
+    S.reminders.water=$("remWater").checked;
+    S.reminders.morn=$("remMorn").value;
+    S.reminders.day=$("remDay").value;
+    S.reminders.eve=$("remEve").value;
+    saveS();
+  });
+});
+
+function renderSettings(){
   const p=prof();
   const opts=S.profiles.map(x=>`<option value="${x.id}"${String(x.id)===String(p.id)?" selected":""}>${esc(x.name)}</option>`).join("");
   $("whoSel").innerHTML=opts;
   $("whoSel").classList.toggle("hide",S.profiles.length<=1);
   $("profSel").innerHTML=opts;
+  $("profEditName").value=p.rawName||p.name;
+  $("profEditSex").value=p.sex||"";
+  $("cycleSettingsBox").classList.toggle("hide",p.sex!=="f");
+  $("cycLen").value=p.cycleLen||28;
+  $("cycLast").value=p.lastPeriod||"";
   $("cityList").innerHTML=(CITIES.some(c=>c[0]===p.city.name)?"":`<option value="-1" selected>${esc(p.city.name)}</option>`)+CITIES.map((c,i)=>`<option value="${i}"${c[0]===p.city.name?" selected":""}>${c[0]}</option>`).join("");
   $("medList").innerHTML=p.meds.length?p.meds.map((m,i)=>`<div class="day"><span><span class="nt">${esc(m.name)}</span> <span class="meta">· ${m.time}</span></span><button type="button" class="link" data-med="${i}">Убрать</button></div>`).join(""):`<div class="sub">Лекарств в списке нет.</div>`;
   $("big").checked=!!S.big;$("theme").value=S.theme||"auto";$("lang").value=LANG;
+  const r=S.reminders||{};
+  $("remWeather").checked=r.weather!==false;
+  $("remWater").checked=r.water!==false;
+  $("remMorn").value=r.morn||"08:30";
+  $("remDay").value=r.day||"14:00";
+  $("remEve").value=r.eve||"20:30";
+  updateNotifStatus();
   renderAuth();
 }
 function applyLook(){
@@ -1023,21 +1616,44 @@ function applyLook(){
   $("simpleBtn").textContent=simple?"Показать все поля":"Оставить только главное";
   if(S.theme==="light"||S.theme==="dark")document.documentElement.dataset.theme=S.theme;
 }
-function switched(){saveS();$("aiOut").classList.add("hide");renderMore();renderForm();renderHistory();renderReports();load()}
+function switched(){saveS();$("aiOut").classList.add("hide");$("qaHist").innerHTML="";$("qaHist").classList.add("hide");renderSettings();renderCycleWidgets();renderSmartCare();renderForm();renderHistory();renderReports();renderAiView();load()}
 $("whoSel").addEventListener("change",()=>{S.cur=$("whoSel").value;switched()});
 $("profSel").addEventListener("change",()=>{S.cur=$("profSel").value;switched()});
+$("profEditName").addEventListener("change",()=>{
+  const p=prof(),v=$("profEditName").value.trim();if(!v)return;
+  p.name=p.rawName=v;saveS();pushProfileUpdate(p);renderSettings();
+});
+$("profEditSex").addEventListener("change",()=>{
+  const p=prof();p.sex=$("profEditSex").value;
+  saveS();pushProfileUpdate(p);renderSettings();renderCycleWidgets();renderHistory();renderReports();renderAiView();
+});
+$("cycLen").addEventListener("change",()=>{
+  const p=prof();p.cycleLen=Math.max(20,Math.min(45,Number($("cycLen").value)||28));
+  saveS();pushProfileUpdate(p);renderCycleWidgets();renderReports();renderAiView();
+});
+$("cycLast").addEventListener("change",()=>{
+  const p=prof(),v=$("cycLast").value;
+  p.lastPeriod=v||null;
+  if(v){
+    if(!Array.isArray(p.periodDates))p.periodDates=[];
+    if(!p.periodDates.includes(v)){p.periodDates.push(v);p.periodDates.sort()}
+  }
+  saveS();pushProfileUpdate(p);renderCycleWidgets();renderHistory();renderReports();renderAiView();
+});
 $("profAdd").addEventListener("click",async()=>{
   const n=$("profNew").value.trim();if(!n)return;
+  const sex=$("profNewSex").value;
   const city=Object.assign({},prof().city);
+  const meta=packMeta({city,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[]});
   if(sb&&sbUser){
-    const {data:ins,error}=await sb.from("mt_profiles").insert({owner_id:sbUser.id,name:n,city,meds:[]}).select().single();
+    const {data:ins,error}=await sb.from("mt_profiles").insert({owner_id:sbUser.id,name:n,city:meta,meds:[]}).select().single();
     if(!error&&ins){
-      S.profiles.push({id:ins.id,owner_id:ins.owner_id,name:ins.name,rawName:ins.name,city,meds:[]});
+      S.profiles.push({id:ins.id,owner_id:ins.owner_id,name:ins.name,rawName:ins.name,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});
       S.cur=ins.id;$("profNew").value="";switched();return;
     }
   }
   const id=Date.now();
-  S.profiles.push({id,name:n,city,meds:[]});S.cur=id;$("profNew").value="";switched();
+  S.profiles.push({id,name:n,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});S.cur=id;$("profNew").value="";switched();
 });
 $("cityList").addEventListener("change",()=>{const c=CITIES[$("cityList").value];if(!c)return;prof().city={name:c[0],lat:c[1],lon:c[2]};saveS();pushProfileUpdate(prof());load()});
 $("citySearch").addEventListener("click",async()=>{
@@ -1045,37 +1661,53 @@ $("citySearch").addEventListener("click",async()=>{
   try{const r=await j(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=${LANG==="en"?"en":"ru"}`);
     if(!r.results){$("cityRes").textContent="Ничего не найдено. Проверьте название.";return}
     $("cityRes").innerHTML=r.results.map((c,i)=>`<button type="button" data-i="${i}">${esc(c.name)}, ${esc(c.admin1||"")} ${esc(c.country||"")}</button>`).join("");
-    $("cityRes").onclick=ev=>{const c=r.results[ev.target.dataset.i];if(!c)return;prof().city={name:c.name,lat:c.latitude,lon:c.longitude};saveS();pushProfileUpdate(prof());$("cityRes").innerHTML="";renderMore();load()};
+    $("cityRes").onclick=ev=>{const c=r.results[ev.target.dataset.i];if(!c)return;prof().city={name:c.name,lat:c.latitude,lon:c.longitude};saveS();pushProfileUpdate(prof());$("cityRes").innerHTML="";renderSettings();load()};
   }catch(e){$("cityRes").textContent="Поиск по названию сейчас недоступен: нет связи с сервисом. Выберите город из списка выше."}
 });
-$("medAdd").addEventListener("click",()=>{const n=$("medName").value.trim();if(!n)return;prof().meds.push({name:n,time:$("medTime").value});$("medName").value="";saveS();pushProfileUpdate(prof());renderMore();renderForm()});
-$("medList").addEventListener("click",ev=>{const i=ev.target.dataset.med;if(i==null)return;prof().meds.splice(+i,1);saveS();pushProfileUpdate(prof());renderMore();renderForm()});
+$("medAdd").addEventListener("click",()=>{const n=$("medName").value.trim();if(!n)return;prof().meds.push({name:n,time:$("medTime").value});$("medName").value="";saveS();pushProfileUpdate(prof());renderSettings();renderForm();renderSmartCare()});
+$("medList").addEventListener("click",ev=>{const i=ev.target.dataset.med;if(i==null)return;prof().meds.splice(+i,1);saveS();pushProfileUpdate(prof());renderSettings();renderForm();renderSmartCare()});
 $("lang").addEventListener("change",()=>{S.lang=$("lang").value;saveS();try{location.reload()}catch(e){}});
 $("simpleBtn").addEventListener("click",()=>{S.simple=S.simple===false;saveS();applyLook()});
 $("big").addEventListener("change",()=>{S.big=$("big").checked;saveS();applyLook()});
 $("theme").addEventListener("change",()=>{S.theme=$("theme").value;saveS();if(S.theme==="auto")delete document.documentElement.dataset.theme;applyLook()});
 $("csvBtn").addEventListener("click",()=>{
-  const head="человек;дата;время;верхнее;нижнее;пульс;головная боль;самочувствие;сон;вода;стресс;симптомы;привычки;лекарства принято;лекарств всего;заметка;температура;атм. давление гПа;изменение 24ч;изменение 3ч;влажность;ветер;порывы;облачность;осадки;PM2.5;PM10;NO2;O3;SO2;Kp;возраст Луны;отбой;подъём;качество сна";
+  const head="человек;дата;время;верхнее;нижнее;пульс;головная боль;самочувствие;сон;вода;стресс;симптомы;привычки;лекарства принято;лекарств всего;день цикла;заметка;температура;атм. давление гПа;изменение 24ч;изменение 3ч;влажность;ветер;порывы;облачность;осадки;PM2.5;PM10;NO2;O3;SO2;Kp;возраст Луны;отбой;подъём;качество сна";
   const nm=id=>(S.profiles.find(p=>String(p.id)===String(id))||{name:""}).name, cl=s=>String(s||"").replace(/;/g,",");
-  const rows=ALL.map(e=>{const v=e.env||{};return [cl(nm(e.pid)),new Date(e.ts).toISOString(),e.tod,e.sys,e.dia,e.pulse,e.head,e.mood,e.sleep,e.water,e.stress,cl((e.sym||[]).join(", ")),cl((e.hab||[]).join(", ")),e.meds?e.meds.taken.length:"",e.meds?e.meds.total:"",cl(e.note),v.t,v.p,v.dp24,v.dp3,v.hum,v.wind,v.gust,v.cloud,v.precip,v.pm25,v.pm10,v.no2,v.o3,v.so2,v.kp,v.moonAge,e.bed,e.wake,e.sq].map(x=>x==null?"":x).join(";")});
+  const rows=ALL.map(e=>{const v=e.env||{};return [cl(nm(e.pid)),new Date(e.ts).toISOString(),e.tod,e.sys,e.dia,e.pulse,e.head,e.mood,e.sleep,e.water,e.stress,cl((e.sym||[]).join(", ")),cl((e.hab||[]).join(", ")),e.meds?e.meds.taken.length:"",e.meds?e.meds.total:"",e.cycleDay||"",cl(e.note),v.t,v.p,v.dp24,v.dp3,v.hum,v.wind,v.gust,v.cloud,v.precip,v.pm25,v.pm10,v.no2,v.o3,v.so2,v.kp,v.moonAge,e.bed,e.wake,e.sq].map(x=>x==null?"":x).join(";")});
   copyOut([head,...rows].join("\n"),$("csv"),$("csvBtn"));
 });
 
-/* ---------- Views ---------- */
-const VIEWS=["today","entry","history","reports","more"];
-function show(name){const v=VIEWS.includes(name)?name:"today";
+/* ---------- Views & Gear Navigation ---------- */
+const VIEWS=["today","entry","history","reports","ai","settings"];
+let prevView="today";
+function show(name){
+  const v=VIEWS.includes(name)?name:"today";
+  if(v!=="settings")prevView=v;
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
-  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));window.scrollTo(0,0)}
-function route(){show(location.hash.slice(1))}
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
+  $("gearBtn").classList.toggle("on",v==="settings");
+  window.scrollTo(0,0);
+}
+function route(){
+  const h=location.hash.slice(1);
+  show(h==="more"?"settings":h);
+}
 window.addEventListener("hashchange",route);
 document.querySelector("nav").addEventListener("click",ev=>{const a=ev.target.closest("a");if(!a)return;ev.preventDefault();show(a.dataset.v);
   try{history.replaceState(null,"","#"+a.dataset.v)}catch(e){}});
+$("gearBtn").addEventListener("click",()=>{
+  const next=$("v-settings").classList.contains("on")?prevView:"settings";
+  show(next);
+  try{history.replaceState(null,"","#"+next)}catch(e){}
+});
 $("cmpA").innerHTML=METRIC.map((m,i)=>`<option value="${i}">${m[0]}</option>`).join("");
 $("cmpB").innerHTML=FACTOR.map((m,i)=>`<option value="${i}">${m[0]}</option>`).join("");
-applyLook();route();renderMore();renderForm();renderHistory();renderReports();
+applyLook();route();renderSettings();renderCycleWidgets();renderSmartCare();renderForm();renderHistory();renderReports();renderAiView();
 if(trMap&&document.body){document.documentElement.lang=LANG;tr(document.body);
   new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(tr))).observe(document.body,{childList:true,subtree:true})}
-load();setInterval(load,30*60*1000);
+load();
+setInterval(load,30*60*1000);
+setInterval(checkScheduledReminders,60*1000);
 
 /* ---------- Check existing Supabase session & Start Gate ---------- */
 (async()=>{
