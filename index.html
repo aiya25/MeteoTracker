@@ -15,7 +15,7 @@
 <style>
 :root{
   --bg:#f5f6fa; --surface:#ffffff; --ink:#14171f; --muted:#6e7585; --line:#e8ebf2; --accent:#4353ff; --on:#fff;
-  --ok:#109668; --warn:#c97800; --bad:#df433b; --rose:#e11d48;
+  --ok:#109668; --warn:#c97800; --bad:#df433b; --rose:#e11d48; --ovul:#0d9488; --fert:#2dd4bf;
   --display:"Geologica","Onest",system-ui,sans-serif;
   --body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --shadow:0 2px 8px rgba(20,23,31,.03),0 10px 28px rgba(20,23,31,.05);
@@ -23,12 +23,12 @@
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0c0e14; --surface:#161923; --ink:#f2f4f8; --muted:#8f96a6; --line:#252936; --accent:#8d97ff; --on:#0c0e14;
-    --ok:#45d19c; --warn:#ffb648; --bad:#ff7a70; --rose:#fb7185; --shadow:none; color-scheme:dark;
+    --ok:#45d19c; --warn:#ffb648; --bad:#ff7a70; --rose:#fb7185; --ovul:#2dd4bf; --fert:#14b8a6; --shadow:none; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0c0e14; --surface:#161923; --ink:#f2f4f8; --muted:#8f96a6; --line:#252936; --accent:#8d97ff; --on:#0c0e14;
-  --ok:#45d19c; --warn:#ffb648; --bad:#ff7a70; --rose:#fb7185; --shadow:none; color-scheme:dark;
+  --ok:#45d19c; --warn:#ffb648; --bad:#ff7a70; --rose:#fb7185; --ovul:#2dd4bf; --fert:#14b8a6; --shadow:none; color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -98,7 +98,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;align-self:flex-start;margin-top:6px;white-space:nowrap;background:color-mix(in srgb,currentColor 13%,transparent)}
 .pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)} .pill.mute{color:var(--muted)}
 
-/* Collapsible Details / Accordions for visual calm */
+/* Collapsible Details / Accordions */
 details.fold{background:var(--surface);border-radius:24px;padding:16px 20px;box-shadow:var(--shadow)}
 details.fold summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-weight:600;font-size:16px;user-select:none}
 details.fold summary::-webkit-details-marker{display:none}
@@ -134,6 +134,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .chip input{position:absolute;opacity:0;width:1px;height:1px}
 .chip span{display:inline-block;padding:9px 14px;border-radius:999px;background:var(--bg)}
 .chip input:checked+span{background:var(--accent);color:var(--on)}
+.chip.rose input:checked+span{background:var(--rose);color:#fff}
 .chip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 .quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .quick button{border:0;border-radius:24px;padding:24px 6px;font-family:var(--display);font-size:17px;font-weight:600;cursor:pointer;transition:transform .12s}
@@ -142,7 +143,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .quick .m{background:color-mix(in srgb,var(--warn) 15%,var(--surface));color:var(--warn)}
 .quick .b{background:color-mix(in srgb,var(--bad) 15%,var(--surface));color:var(--bad)}
 
-/* Entries & Calendar */
+/* Entries & Flo-style Calendar */
 .entry{border-top:1px solid var(--line);padding:14px 0;display:flex;flex-direction:column;gap:3px}
 .entry:first-child{border-top:0;padding-top:0}
 .entry .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
@@ -159,9 +160,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .cal .e{background:none}
 .cal .ok{background:var(--ok);color:#fff} .cal .warn{background:var(--warn);color:#fff} .cal .bad{background:var(--bad);color:#fff}
 .cal .today{outline:2px solid var(--ink);outline-offset:1px}
+/* Flo / Eva Cycle Indicators on Calendar */
 .cal .period::after{content:"";position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--rose)}
 .cal .ok.period::after,.cal .warn.period::after,.cal .bad.period::after{background:#fff}
 .cal .pred-period{outline:1.5px dashed var(--rose);outline-offset:-2px}
+.cal .fertile{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ovul) 55%,transparent)}
+.cal .ovul::before{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--ovul)}
+.cal .ok.ovul::before,.cal .warn.ovul::before,.cal .bad.ovul::before{background:#fff}
 #calT{font-family:var(--display);font-weight:600;font-size:17px}
 
 /* Tables & Lists */
@@ -193,15 +198,25 @@ html.simple .adv{display:none}
 .hours b{font-family:var(--display);font-weight:500;font-size:18px}
 .ai-out{background:var(--bg);border-radius:18px;padding:16px;font-size:15px;line-height:1.6;white-space:pre-wrap}
 
-/* Soft Cycle Card */
+/* Flo / Eva Cycle Ring & Card */
 .cycle-card{background:var(--surface);border-left:4px solid var(--rose)}
-.cycle-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.cycle-day{font-family:var(--display);font-size:23px;font-weight:600;color:var(--rose)}
+.cycle-head{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.cycle-ring-wrap{display:flex;align-items:center;gap:14px}
+.cycle-ring{width:68px;height:68px;position:relative;flex-shrink:0}
+.cycle-ring svg{width:68px;height:68px;transform:rotate(-90deg)}
+.cycle-ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;line-height:1;color:var(--ink)}
+.cycle-ring .num small{font-size:10px;font-weight:500;color:var(--muted);margin-top:2px}
+.cycle-day{font-family:var(--display);font-size:21px;font-weight:600;color:var(--ink)}
+.cycle-badges{display:flex;flex-wrap:wrap;gap:6px}
+.cbadge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--bg);color:var(--muted)}
+.cbadge.rose{background:color-mix(in srgb,var(--rose) 12%,transparent);color:var(--rose)}
+.cbadge.ovul{background:color-mix(in srgb,var(--ovul) 14%,transparent);color:var(--ovul)}
 .cycle-guide{background:var(--bg);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.55;display:flex;flex-direction:column;gap:8px}
-.cycle-tag{display:inline-block;font-size:12px;font-weight:600;color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent);padding:3px 10px;border-radius:999px;align-self:flex-start}
 .cycle-chips{display:flex;flex-wrap:wrap;gap:6px}
 .cycle-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:500}
 .cycle-chip button{border:0;background:none;color:var(--rose);font-weight:700;cursor:pointer;padding:0 2px;font-size:14px}
+.cycle-hist-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;padding:8px 0;border-top:1px solid var(--line)}
+.cycle-hist-row:first-child{border-top:0;padding-top:0}
 
 /* AI Workspace */
 .period-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:var(--bg);padding:4px;border-radius:14px}
@@ -347,7 +362,26 @@ html.simple .adv{display:none}
       <label for="mood">Самочувствие: <b id="moodV">5</b> из 10<input id="mood" type="range" min="0" max="10" value="5"></label>
       <label for="head" class="adv">Головная боль: <b id="headV">0</b> из 10<input id="head" type="range" min="0" max="10" value="0"></label>
       <div class="stack"><span class="meta">Лекарства приняты</span><div class="chips" id="medBox"></div></div>
-      <div class="stack adv"><span class="meta">Симптомы</span><div class="chips" id="symBox"></div></div>
+
+      <!-- Flo / Eva Cycle & Female Symptoms Block on Entry -->
+      <div id="cycleFormSub" class="stack hide" style="border-top:1px solid var(--line);padding-top:12px">
+        <span class="meta">Женское здоровье и цикл</span>
+        <div class="row2">
+          <label for="flowSel">Интенсивность выделений
+            <select id="flowSel">
+              <option value="">нет / не отмечать</option>
+              <option value="мажущие">мажущие</option>
+              <option value="скудные">скудные</option>
+              <option value="умеренные">умеренные</option>
+              <option value="обильные">обильные</option>
+            </select>
+          </label>
+          <label for="bbtInp">Базальная темп. (°C)<input id="bbtInp" type="number" step="0.05" min="35" max="42" placeholder="36.6"></label>
+        </div>
+        <div class="chips" id="femSymBox"></div>
+      </div>
+
+      <div class="stack adv"><span class="meta">Общие симптомы</span><div class="chips" id="symBox"></div></div>
       <div class="stack adv"><span class="meta">Сегодня было</span><div class="chips" id="habBox"></div></div>
       <div class="stack"><span class="meta">Сон прошлой ночью</span>
         <div class="row3">
@@ -364,10 +398,10 @@ html.simple .adv{display:none}
       <div class="sub" id="saved"></div>
     </form>
 
-    <!-- Collapsible Cycle Tracker on Entry so the screen stays light -->
+    <!-- Collapsible Cycle Tracker & History on Entry -->
     <div id="cycleEntrySection" class="hide">
       <details class="fold" id="cycleEntryFold">
-        <summary><span style="color:var(--rose)">●</span>&nbsp;Отметка дней цикла</summary>
+        <summary><span style="color:var(--rose)">●</span>&nbsp;Дни цикла и история циклов</summary>
         <div class="fold-body" id="cycleEntryCard"></div>
       </details>
     </div>
@@ -381,7 +415,13 @@ html.simple .adv{display:none}
     <div class="card stack">
       <div class="rowx" style="justify-content:space-between"><button class="btn ghost sm" type="button" id="calPrev">Раньше</button><b id="calT"></b><button class="btn ghost sm" type="button" id="calNext">Позже</button></div>
       <div class="cal" id="cal"></div>
-      <div class="legend"><span><i style="background:var(--ok)"></i>хороший</span><span><i style="background:var(--warn)"></i>средний</span><span><i style="background:var(--bad)"></i>плохой</span><span id="calCycleLegend" class="hide"><i style="background:var(--rose)"></i>месячные (нажмите на дату)</span></div>
+      <div class="legend">
+        <span><i style="background:var(--ok)"></i>хороший</span>
+        <span><i style="background:var(--warn)"></i>средний</span>
+        <span><i style="background:var(--bad)"></i>плохой</span>
+        <span id="calCycleLegend" class="hide"><i style="background:var(--rose)"></i>месячные</span>
+        <span id="calOvulLegend" class="hide"><i style="background:var(--ovul)"></i>овуляция / фертильные</span>
+      </div>
     </div>
 
     <details class="fold">
@@ -410,6 +450,11 @@ html.simple .adv{display:none}
       <button type="button" data-d="365">Год</button>
     </div>
     <div class="grid" id="week"></div>
+
+    <div id="cycleStatsSection" class="hide stack">
+      <div class="sec-head"><h2>Аналитика циклов (как в Flo)</h2></div>
+      <div class="card stack" id="cycleStatsCard"></div>
+    </div>
 
     <div class="sec-head"><h2>Закономерности</h2></div>
     <div class="card stack">
@@ -492,10 +537,18 @@ html.simple .adv{display:none}
         <label for="profEditSex">Пол<select id="profEditSex"><option value="f">Женский</option><option value="m">Мужской</option><option value="">Не указан</option></select></label>
       </div>
       <div id="cycleSettingsBox" class="stack hide" style="border-top:1px solid var(--line);padding-top:14px">
-        <div class="row2">
-          <label for="cycLen">Длина цикла (дней)<input id="cycLen" type="number" min="20" max="45" value="28"></label>
-          <label for="cycLast">Начало последних месячных<input id="cycLast" type="date"></label>
+        <label for="cycleGoal">Режим трекера цикла
+          <select id="cycleGoal">
+            <option value="track">Отслеживание цикла и самочувствия</option>
+            <option value="conceive">Планирование беременности (окно фертильности)</option>
+          </select>
+        </label>
+        <div class="row3">
+          <label for="cycLen">Цикл (дн.)<input id="cycLen" type="number" min="20" max="45" value="28"></label>
+          <label for="cycDur">Месячные (дн.)<input id="cycDur" type="number" min="2" max="10" value="5"></label>
+          <label for="cycLut">Лютеин. (дн.)<input id="cycLut" type="number" min="10" max="17" value="14"></label>
         </div>
+        <label for="cycLast">Начало последних месячных<input id="cycLast" type="date"></label>
         <div class="sub" id="cycAnalysisInfo"></div>
       </div>
       <div class="stack" style="border-top:1px solid var(--line);padding-top:14px">
@@ -553,8 +606,8 @@ html.simple .adv{display:none}
         <label class="chip" for="remWeather"><input type="checkbox" id="remWeather" checked><span>Предупреждать о перепадах погоды и Kp</span></label>
         <label class="chip" for="remWater"><input type="checkbox" id="remWater" checked><span>Напоминать пить воду днём</span></label>
         <div id="remCycleConsentBox" class="stack hide" style="background:color-mix(in srgb,var(--rose) 7%,var(--bg));padding:12px;border-radius:16px">
-          <label class="chip" for="remCycle"><input type="checkbox" id="remCycle"><span>Разрешаю уведомления о начале месячных</span></label>
-          <div class="sub">За 1 день до расчётного начала и в день начала придёт мягкое напоминание.</div>
+          <label class="chip" for="remCycle"><input type="checkbox" id="remCycle"><span>Разрешаю уведомления о начале месячных и овуляции</span></label>
+          <div class="sub">За 1 день до расчётного начала цикла, в день начала и в день овуляции придёт мягкое напоминание.</div>
         </div>
         <div class="row3">
           <label for="remMorn">Утро<input type="time" id="remMorn" value="08:30"></label>
@@ -640,7 +693,7 @@ let sbShares=[];
 
 /* ---------- State ---------- */
 let S=store.get("mt2",null);
-if(!S)S={profiles:[{id:1,name:"Я",sex:"f",cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city:store.get("mt_city",{name:"Астана",lat:51.1801,lon:71.446}),meds:[]}],cur:1,big:false,theme:"auto"};
+if(!S)S={profiles:[{id:1,name:"Я",sex:"f",cycleGoal:"track",cycleLen:28,periodDur:5,lutealLen:14,lastPeriod:null,periodDates:[],rxNotes:[],city:store.get("mt_city",{name:"Астана",lat:51.1801,lon:71.446}),meds:[]}],cur:1,big:false,theme:"auto"};
 if(!S.reminders)S.reminders={weather:true,water:true,cycle:false,morn:"08:30",day:"14:00",eve:"20:30",fired:{}};
 let ALL=store.get("mt2_entries",null);
 if(!ALL)ALL=store.get("mt_entries",[]).map(e=>Object.assign({pid:1},e));
@@ -691,40 +744,46 @@ const prof=()=>S.profiles.find(p=>String(p.id)===String(S.cur))||S.profiles[0];
 const mine=()=>ALL.filter(e=>String(e.pid)===String(prof().id));
 const saveS=()=>store.set("mt2",S), saveE=()=>store.set("mt2_entries",ALL);
 let env=null, demo=false, calM=new Date();
-const SYM=["головокружение","тошнота","боль в суставах","сердцебиение","шум в ушах","слабость","отёки","тянет низ живота","перепады настроения"];
-const HAB=["кофе","алкоголь","солёное","прогулка","нагрузка"];
+const SYM=["головокружение","тошнота","боль в суставах","сердцебиение","шум в ушах","слабость","отёки"];
+const FEM_SYM=["тянет низ живота","болит грудь","перепады настроения","раздражительность","тяга к сладкому","вздутие","акне","выделения ЯБ (овуляция)"];
+const HAB=["кофе","алкоголь","солёное","прогулка","нагрузка","недосып"];
 
-/* ---------- Detailed Cycle Guide & Multi-Day Tracking ---------- */
+/* ---------- Flo & Eva Complete Cycle Engine ---------- */
 const CYCLE_GUIDES={
   menstruation:{
-    tag:"1–5 день · Менструация",
-    what:"Уровень эстрогена и прогестерона минимален. Возможны тянущие ощущения внизу живота, сонливость, снижение артериального давления и повышенная чувствительность к холоду и перепадам погоды.",
-    todo:"Бережный режим: больше тёплой воды, полноценный сон, умеренная ходьба вместо тяжёлых тренировок. При склонности к головокружению избегайте резких подъёмов и не пропускайте приёмы пищи."
+    tag:"Менструация",
+    what:"Эстроген и прогестерон на минимуме. Возможны спазмы внизу живота, сонливость, снижение давления и повышенная чувствительность к холоду и перепадам погоды.",
+    todo:"Бережный режим: больше тёплой воды, полноценный сон, лёгкая прогулка вместо интенсивного спорта. Не пропускайте приёмы пищи."
   },
   follicular:{
     tag:"Фолликулярная фаза",
-    what:"Эстроген плавно растёт, сосуды лучше адаптируются к нагрузкам. Обычно в эти дни стабильнее давление, выше уровень энергии, яснее голова и легче переносятся погодные качели.",
-    todo:"Хорошее время для плановой активности, прогулок и важных дел. Продолжайте вести замеры утром и вечером, чтобы видеть свою «эталонную» норму давления."
+    what:"Эстроген плавно растёт, сосуды лучше адаптируются к нагрузкам. Обычно стабильнее давление, больше энергии и выше устойчивость к смене погоды.",
+    todo:"Отличное время для плановой активности и важных задач. Продолжайте замеры утром и вечером для отслеживания своей нормы."
+  },
+  fertile:{
+    tag:"Фертильное окно",
+    what:"Высокий уровень эстрогена перед овуляцией. Повышается энергия, настроение и либидо, организм максимально устойчив к стрессу.",
+    todo:"Пейте достаточно воды, следите за пульсом при нагрузках и отмечайте изменения самочувствия."
   },
   ovulation:{
-    tag:"Овуляция (середина цикла)",
-    what:"Пик эстрогена и лютеинизирующего гормона. У некоторых женщин в эти 2–3 дня может слегка учащаться пульс, появляться лёгкая тяжесть внизу живота или чувствительность к жаре и духоте.",
-    todo:"Пейте достаточно воды, следите за пульсом при нагрузках и проветривайте комнату перед сном."
+    tag:"День овуляции",
+    what:"Пик эстрогена и лютеинизирующего гормона, выход яйцеклетки. Возможны лёгкое покалывание с одной стороны внизу живота, учащение пульса или чувствительность к духоте.",
+    todo:"Пейте чистую воду, избегайте перегрева и при желании измерьте базальную температуру утром."
   },
   luteal:{
     tag:"Лютеиновая фаза",
-    what:"Растёт уровень прогестерона: температура тела может быть выше на 0,3–0,5 °C, тело сильнее удерживает жидкость, возможна лёгкая утомляемость во второй половине дня.",
-    todo:"Уменьшите избыток соли и кофеина во второй половине дня, чтобы не провоцировать отёки и скачки вечернего давления."
+    what:"Доминирует прогестерон: базальная температура выше на 0,3–0,5 °C, тело сильнее удерживает воду, возможна лёгкая утомляемость во второй половине дня.",
+    todo:"Уменьшите избыток соли и кофеина вечером, чтобы избежать отёков и скачков давления."
   },
   pms:{
-    tag:"Поздняя лютеиновая фаза (ПМС)",
-    what:"Резкое падение прогестерона и эстрогена перед менструацией. В эти 4–5 дней чаще всего обостряется метеочувствительность: возможны головные боли, отёчность, колебания давления, тревожность и прерывистый сон.",
-    todo:"Максимально бережный режим: ложитесь спать в одно время, ограничьте солёное, алкоголь и лишний кофе, особенно если в прогнозе скачок атмосферного давления."
+    tag:"Предменструальная фаза (ПМС)",
+    what:"Резкое падение прогестерона и эстрогена перед менструацией. В эти 4–5 дней обостряется метеочувствительность: возможны головные боли, отёчность, колебания давления, тревожность и прерывистый сон.",
+    todo:"Максимально бережный режим: ложитесь спать в одно время, ограничьте солёное, алкоголь и лишний кофе, особенно при скачках атмосферного давления."
   },
   unset:{
     tag:"Цикл не настроен",
-    what:"Отметьте дни, когда были месячные (на вкладке «Запись» или в Календаре). Приложение само рассчитает фазу цикла и дату следующих месячных.",
-    todo:"Нажмите «Отметить сегодня» или выберите даты в блоке ниже."
+    what:"Отметьте дни, когда были месячные (в Календаре или на вкладке «Запись»). Приложение само рассчитает овуляцию, фертильное окно, ПМС и дату следующих месячных.",
+    todo:"Нажмите «Отметить сегодня» или выберите даты в Календаре."
   }
 };
 
@@ -748,14 +807,19 @@ function analyzeCycleHistory(p){
     if(diff>=18&&diff<=50)intervals.push(diff);
   }
   const avgLen=intervals.length?Math.round(avg(intervals)):(Number(p.cycleLen)||28);
-  const avgDuration=blocks.length?Math.round(avg(blocks.map(b=>b.length))):5;
-  return {dates,starts,blocks,intervals,avgLen,avgDuration};
+  const avgDuration=blocks.length?Math.round(avg(blocks.map(b=>b.length))):(Number(p.periodDur)||5);
+  const minLen=intervals.length?Math.min(...intervals):avgLen;
+  const maxLen=intervals.length?Math.max(...intervals):avgLen;
+  const variation=maxLen-minLen;
+  const regularity=intervals.length<2?"мало данных":variation<=4?"регулярный (±"+variation+" дн.)":"нерегулярный (разброс "+variation+" дн.)";
+  return {dates,starts,blocks,intervals,avgLen,avgDuration,minLen,maxLen,variation,regularity};
 }
 
 function getCycleInfo(p, targetTs=Date.now()){
   if(!p||p.sex!=="f")return null;
   const hist=analyzeCycleHistory(p);
   const len=hist.avgLen;
+  const lut=Number(p.lutealLen)||14;
   let startIso=p.lastPeriod||null;
   const targetIso=isoDate(targetTs);
   if(hist.starts.length){
@@ -763,18 +827,36 @@ function getCycleInfo(p, targetTs=Date.now()){
     if(validStarts.length)startIso=validStarts[validStarts.length-1];
   }
   const isPeriodToday=hist.dates.includes(targetIso);
-  if(!startIso)return {day:null,phase:"Не указано начало цикла",guideKey:"unset",isPeriodToday,len,nextIn:null,nextIso:null,hist};
+  if(!startIso)return {day:null,phase:"Не указано начало цикла",guideKey:"unset",isPeriodToday,len,nextIn:null,nextIso:null,ovulDay:null,ovulIso:null,fertStartIso:null,fertEndIso:null,chance:"—",hist};
   const diffDays=Math.floor((Date.parse(targetIso+"T12:00:00")-Date.parse(startIso+"T12:00:00"))/DAY);
-  if(diffDays<0)return {day:null,phase:"Ожидание начала",guideKey:"unset",isPeriodToday,len,nextIn:null,nextIso:null,hist};
+  if(diffDays<0)return {day:null,phase:"Ожидание начала",guideKey:"unset",isPeriodToday,len,nextIn:null,nextIso:null,ovulDay:null,ovulIso:null,fertStartIso:null,fertEndIso:null,chance:"—",hist};
   const cycleDay=diffDays+1;
+
+  // Flo/Eva Ovulation & Fertile window calculation (ovulation ~ lutealLen days before next period)
+  const ovulDay=Math.max(8,len-lut+1);
+  const fertStartDay=Math.max(6,ovulDay-4);
+  const fertEndDay=ovulDay+1;
+  const startTs=Date.parse(startIso+"T12:00:00");
+  const ovulIso=isoDate(startTs+(ovulDay-1)*DAY);
+  const fertStartIso=isoDate(startTs+(fertStartDay-1)*DAY);
+  const fertEndIso=isoDate(startTs+(fertEndDay-1)*DAY);
+
+  const isOvulToday=cycleDay===ovulDay;
+  const isFertileToday=cycleDay>=fertStartDay&&cycleDay<=fertEndDay;
+  let chance="Низкая";
+  if(isOvulToday||cycleDay===ovulDay-1)chance="Высокая";
+  else if(isFertileToday)chance="Средняя";
+
   let phase="Лютеиновая фаза", guideKey="luteal";
   if(cycleDay<=hist.avgDuration||isPeriodToday){phase="Менструация";guideKey="menstruation"}
-  else if(cycleDay<=Math.round(len*0.45)){phase="Фолликулярная фаза";guideKey="follicular"}
-  else if(cycleDay<=Math.round(len*0.55)){phase="Овуляция";guideKey="ovulation"}
+  else if(isOvulToday){phase="День овуляции";guideKey="ovulation"}
+  else if(isFertileToday){phase="Фертильное окно";guideKey="fertile"}
+  else if(cycleDay<fertStartDay){phase="Фолликулярная фаза";guideKey="follicular"}
   else if(cycleDay>=len-4){phase="Предменструальная фаза (ПМС)";guideKey="pms"}
+
   const nextIn=len-diffDays;
-  const nextIso=isoDate(Date.parse(startIso+"T12:00:00")+len*DAY);
-  return {day:cycleDay,phase,guideKey,isPeriodToday,len,nextIn,nextIso,startIso,hist};
+  const nextIso=isoDate(startTs+len*DAY);
+  return {day:cycleDay,phase,guideKey,isPeriodToday,isOvulToday,isFertileToday,chance,len,nextIn,nextIso,ovulDay,ovulIso,fertStartIso,fertEndIso,startIso,hist};
 }
 
 function togglePeriodDate(iso){
@@ -788,15 +870,16 @@ function togglePeriodDate(iso){
   if(hist.starts.length)p.lastPeriod=hist.starts[hist.starts.length-1];
   if(hist.intervals.length)p.cycleLen=hist.avgLen;
   saveS();pushProfileUpdate(p);
-  renderCycleWidgets();renderHistory();renderSettings();
+  renderCycleWidgets();renderHistory();renderReports();renderSettings();
 }
 
-function addPeriodRange(startIso,daysCount=5){
+function addPeriodRange(startIso,daysCount){
   if(!startIso)return;
   const p=prof();
+  const dur=daysCount||(Number(p.periodDur)||5);
   if(!Array.isArray(p.periodDates))p.periodDates=[];
   const baseTs=Date.parse(startIso+"T12:00:00");
-  for(let i=0;i<daysCount;i++){
+  for(let i=0;i<dur;i++){
     const d=isoDate(baseTs+i*DAY);
     if(!p.periodDates.includes(d))p.periodDates.push(d);
   }
@@ -805,7 +888,7 @@ function addPeriodRange(startIso,daysCount=5){
   if(hist.starts.length)p.lastPeriod=hist.starts[hist.starts.length-1];
   if(hist.intervals.length)p.cycleLen=hist.avgLen;
   saveS();pushProfileUpdate(p);
-  renderCycleWidgets();renderHistory();renderSettings();
+  renderCycleWidgets();renderHistory();renderReports();renderSettings();
 }
 
 function renderCycleWidgets(){
@@ -813,47 +896,77 @@ function renderCycleWidgets(){
   const isFem=p&&p.sex==="f";
   $("cycleTodayBox").classList.toggle("hide",!isFem);
   $("cycleEntrySection").classList.toggle("hide",!isFem);
+  $("cycleFormSub").classList.toggle("hide",!isFem);
   $("calCycleLegend").classList.toggle("hide",!isFem);
+  $("calOvulLegend").classList.toggle("hide",!isFem);
+  $("cycleStatsSection").classList.toggle("hide",!isFem);
   if(!isFem)return;
+
   const info=getCycleInfo(p);
   const g=CYCLE_GUIDES[info.guideKey]||CYCLE_GUIDES.unset;
   const todayIso=isoDate(Date.now());
   const nextDateStr=info.nextIso?dstr(Date.parse(info.nextIso+"T12:00:00"),"short"):"";
-  const nextTxt=info.nextIn!=null?(info.nextIn>0?`следующие ~через ${info.nextIn} дн. (${nextDateStr})`:info.nextIn===0?"ожидаются сегодня":`задержка ${Math.abs(info.nextIn)} дн.`):"дата не задана";
+  const ovulDateStr=info.ovulIso?dstr(Date.parse(info.ovulIso+"T12:00:00"),"short"):"";
+  const nextTxt=info.nextIn!=null?(info.nextIn>0?`мес. через ${info.nextIn} дн. (${nextDateStr})`:info.nextIn===0?"ожидаются сегодня":`задержка ${Math.abs(info.nextIn)} дн.`):"дата не задана";
 
-  // Compact Today card with expandable guide
-  $("cycleTodayBox").innerHTML=`<div class="card cycle-card stack" style="gap:10px">
+  // SVG Circular Ring (like Flo / Eva)
+  const pct=info.day?Math.min(1,info.day/info.len):0;
+  const R=28,C=2*Math.PI*R;
+  const dash=(C*pct).toFixed(1);
+  const ringColor=info.isPeriodToday||info.guideKey==="menstruation"?"var(--rose)":(info.isFertileToday?"var(--ovul)":"var(--accent)");
+
+  $("cycleTodayBox").innerHTML=`<div class="card cycle-card stack" style="gap:12px">
     <div class="cycle-head">
-      <div>
-        <div class="k" style="font-size:12px;color:var(--muted);font-weight:600">ЖЕНСКИЙ ЦИКЛ</div>
-        <div class="cycle-day">${info.day?info.day+"-й день цикла":"День не задан"}</div>
+      <div class="cycle-ring-wrap">
+        <div class="cycle-ring">
+          <svg viewBox="0 0 68 68">
+            <circle cx="34" cy="34" r="${R}" fill="none" stroke="var(--bg)" stroke-width="6"/>
+            <circle cx="34" cy="34" r="${R}" fill="none" stroke="${ringColor}" stroke-width="6" stroke-dasharray="${dash} ${C.toFixed(1)}" stroke-linecap="round"/>
+          </svg>
+          <div class="num">${info.day||"—"}<small>день</small></div>
+        </div>
+        <div>
+          <div class="cycle-day">${info.phase}</div>
+          <div class="meta">${nextTxt}</div>
+        </div>
       </div>
       <button type="button" class="btn sm ${info.isPeriodToday?"":"ghost"}" id="btnCycleTodayToggle" style="${info.isPeriodToday?"background:var(--rose);color:#fff":"color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)"}">
-        ${info.isPeriodToday?"✓ Отмечено":"Отметить сегодня"}
+        ${info.isPeriodToday?"✓ Отмечено":"Месячные"}
       </button>
     </div>
-    <div class="meta"><b>${info.phase}</b> · ${nextTxt}</div>
-    <details style="margin-top:2px">
-      <summary class="link" style="color:var(--rose);font-weight:500">Что происходит в организме и что делать сегодня ▾</summary>
+    ${info.day?`<div class="cycle-badges">
+      <span class="cbadge ovul">Овуляция: ~${ovulDateStr} (${info.ovulDay}-й д.)</span>
+      <span class="cbadge ${info.chance==="Высокая"?"ovul":""}">Шанс зачатия: ${info.chance.toLowerCase()}</span>
+    </div>`:""}
+    <details>
+      <summary class="link" style="color:var(--rose);font-weight:500">Гид дня: что происходит и как поддержать себя ▾</summary>
       <div class="cycle-guide" style="margin-top:10px">
-        <span class="cycle-tag">${g.tag}</span>
+        <span class="cbadge rose" style="align-self:flex-start">${g.tag}</span>
         <div><b>Что происходит:</b> ${g.what}</div>
         <div><b>Что делать:</b> ${g.todo}</div>
         <button type="button" class="link" id="btnAskCycleAi" style="color:var(--rose);font-weight:600;margin-top:2px">Спросить ИИ про этот день →</button>
       </div>
     </details>
   </div>`;
+
   $("btnCycleTodayToggle").onclick=()=>togglePeriodDate(todayIso);
   const askBtn=$("btnAskCycleAi");
   if(askBtn)askBtn.onclick=()=>{
     show("ai");
     try{history.replaceState(null,"","#ai")}catch(e){}
-    const q=info.day?`У меня сегодня ${info.day}-й день цикла (${info.phase}). Как это может влиять на моё давление и самочувствие с учётом сегодняшней погоды и моих рекомендаций врача, и что сделать, чтобы день прошёл хорошо?`:"Как женский цикл влияет на давление и метеочувствительность?";
+    const q=info.day?`У меня сегодня ${info.day}-й день цикла (${info.phase}, шанс зачатия: ${info.chance}). Как это может влиять на моё давление, пульс и самочувствие с учётом сегодняшней погоды и рекомендаций врача?`:"Как женский цикл влияет на давление и метеочувствительность?";
     askAiQuestion(q);
   };
 
-  // Entry collapsible block
+  // Entry collapsible block + Cycle History List (like Flo)
   const recentDates=info.hist.dates.slice().reverse().slice(0,14);
+  const blocksHtml=info.hist.blocks.slice().reverse().slice(0,6).map((b,idx,arr)=>{
+    const startTs=Date.parse(b[0]+"T12:00:00");
+    const prevBlock=arr[idx+1];
+    const lenStr=prevBlock?` · цикл ${Math.round((startTs-Date.parse(prevBlock[0]+"T12:00:00"))/DAY)} дн.`:"";
+    return `<div class="cycle-hist-row"><span><b>${dstr(startTs,"short")}</b> (${b.length} дн.)${lenStr}</span><span class="cbadge rose">начало</span></div>`;
+  }).join("");
+
   $("cycleEntryCard").innerHTML=`
     <div class="rowx" style="justify-content:space-between">
       <div><b>${info.day?info.day+"-й день":"Цикл не настроен"}</b><div class="meta">${info.phase} · ${nextTxt}</div></div>
@@ -862,24 +975,33 @@ function renderCycleWidgets(){
       </button>
     </div>
     <div class="stack" style="border-top:1px solid var(--line);padding-top:10px">
-      <span class="meta">Отметить прошлые дни:</span>
+      <span class="meta">Отметить даты месячных:</span>
       <div class="row3" style="grid-template-columns:1.2fr auto auto">
         <input type="date" id="cycPickDate" value="${todayIso}">
         <button type="button" class="btn sm ghost" id="btnCycAddOne">+ 1 день</button>
-        <button type="button" class="btn sm ghost" id="btnCycAddFive">+ 5 дней</button>
+        <button type="button" class="btn sm ghost" id="btnCycAddFive">+ ${p.periodDur||5} дней</button>
       </div>
     </div>
-    ${recentDates.length?`<div class="cycle-chips">${recentDates.map(d=>`<span class="cycle-chip">${dstr(Date.parse(d+"T12:00:00"),"short")}<button type="button" data-rmper="${d}">×</button></span>`).join("")}</div>`:""}`;
+    ${recentDates.length?`<div class="cycle-chips">${recentDates.map(d=>`<span class="cycle-chip">${dstr(Date.parse(d+"T12:00:00"),"short")}<button type="button" data-rmper="${d}">×</button></span>`).join("")}</div>`:""}
+    ${blocksHtml?`<div class="stack" style="border-top:1px solid var(--line);padding-top:10px;gap:2px"><span class="meta" style="margin-bottom:4px">История прошлых циклов:</span>${blocksHtml}</div>`:""}`;
 
   $("btnCycleEntryToggle").onclick=()=>togglePeriodDate(todayIso);
   $("btnCycAddOne").onclick=()=>{const d=$("cycPickDate").value;if(d)togglePeriodDate(d)};
-  $("btnCycAddFive").onclick=()=>{const d=$("cycPickDate").value;if(d)addPeriodRange(d,5)};
+  $("btnCycAddFive").onclick=()=>{const d=$("cycPickDate").value;if(d)addPeriodRange(d,Number(p.periodDur)||5)};
   $("cycleEntryCard").querySelectorAll("[data-rmper]").forEach(b=>{
     b.onclick=()=>togglePeriodDate(b.dataset.rmper);
   });
+
+  // Cycle Statistics Card on Reports (Flo style)
+  $("cycleStatsCard").innerHTML=`
+    <div class="grid">
+      <div class="tile" style="background:var(--bg);box-shadow:none"><span class="k">Средний цикл</span><span class="v">${info.hist.avgLen} <small>дн.</small></span><span class="n">${info.hist.regularity}</span></div>
+      <div class="tile" style="background:var(--bg);box-shadow:none"><span class="k">Длительность мес.</span><span class="v">${info.hist.avgDuration} <small>дн.</small></span><span class="n">записано циклов: ${info.hist.starts.length}</span></div>
+    </div>
+    ${blocksHtml?`<div class="stack" style="gap:2px">${blocksHtml}</div>`:`<div class="sub">Отмечайте начало и дни месячных в календаре, чтобы видеть динамику длины циклов.</div>`}`;
 }
 
-/* ---------- Smart Care & Notifications (Shown only when actionable) ---------- */
+/* ---------- Smart Care & Notifications ---------- */
 function renderSmartCare(){
   const p=prof(),h=new Date().getHours();
   const slot=h<12?"утро":h<18?"день":"вечер";
@@ -896,6 +1018,8 @@ function renderSmartCare(){
       tips.push(`🌸 <b>Завтра начало цикла:</b> по вашему календарю месячные ожидаются завтра. Подготовьтесь заранее.`);
     }else if(ci&&ci.nextIn===0&&!ci.isPeriodToday){
       tips.push(`🌸 <b>Сегодня расчётное начало цикла:</b> если месячные начались, отметьте их ниже.`);
+    }else if(ci&&ci.isOvulToday){
+      tips.push(`🌿 <b>Сегодня день овуляции:</b> пик фертильности, пейте достаточно воды.`);
     }
   }
   if(untaken.length){
@@ -967,6 +1091,8 @@ function checkScheduledReminders(){
       fireOnce("cycle_pre1","Метеотрекер · Прогноз цикла","Завтра по вашему календарю ожидается начало месячных. Выпейте больше воды и запланируйте спокойный режим.");
     }else if(ci&&ci.nextIn===0&&!ci.isPeriodToday){
       fireOnce("cycle_day0","Метеотрекер · Начало цикла","Сегодня расчётный день начала месячных. Если они начались — отметьте это в дневнике.");
+    }else if(ci&&ci.isOvulToday){
+      fireOnce("cycle_ovul","Метеотрекер · Овуляция","Сегодня расчётный день овуляции (пик фертильного окна).");
     }
   }
 }
@@ -978,7 +1104,10 @@ function packMeta(p){
   return {
     city:p.city||{name:"Астана",lat:51.1801,lon:71.446},
     sex:p.sex||"",
+    cycleGoal:p.cycleGoal||"track",
     cycleLen:p.cycleLen||28,
+    periodDur:p.periodDur||5,
+    lutealLen:p.lutealLen||14,
     lastPeriod:p.lastPeriod||null,
     periodDates:p.periodDates||[],
     rxNotes:p.rxNotes||[]
@@ -1019,7 +1148,10 @@ async function syncFromCloud(){
           name:cp.owner_id===sbUser.id?cp.name:(cp.name+" (общий)"),
           rawName:cp.name,
           sex:meta.sex||"",
+          cycleGoal:meta.cycleGoal||"track",
           cycleLen:meta.cycleLen||28,
+          periodDur:meta.periodDur||5,
+          lutealLen:meta.lutealLen||14,
           lastPeriod:meta.lastPeriod||null,
           periodDates:meta.periodDates||[],
           rxNotes:meta.rxNotes||[],
@@ -1209,10 +1341,10 @@ function pressureChart(){
 const data=()=>mine();
 
 /* ---------- Metrics, Factors & Patterns ---------- */
-const METRIC=[["Верхнее давление",e=>e.sys],["Нижнее давление",e=>e.dia],["Пульс",e=>e.pulse],["Головная боль",e=>e.head],["Самочувствие",e=>e.mood]];
+const METRIC=[["Верхнее давление",e=>e.sys],["Нижнее давление",e=>e.dia],["Пульс",e=>e.pulse],["Головная боль",e=>e.head],["Самочувствие",e=>e.mood],["Базальная температура",e=>e.bbt]];
 const ev=(e,k,f)=>e.env&&e.env[k]!=null?(f?f(e.env[k]):e.env[k]):null;
 const FACTOR=[["Атмосферное давление, мм",e=>ev(e,"p",x=>x*HPA2MM)],["Изменение давления за сутки, мм",e=>ev(e,"dp24",x=>x*HPA2MM)],["Температура, °C",e=>ev(e,"t")],
-  ["Влажность, %",e=>ev(e,"hum")],["PM2.5, мкг/м³",e=>ev(e,"pm25")],["Kp-индекс",e=>ev(e,"kp")],["Луна, % диска",e=>ev(e,"moonAge",a=>(1-Math.cos(2*Math.PI*a/SYN))/2*100)],["Сон, часов",e=>e.sleep],["Качество сна, 1–5",e=>e.sq||null],["День цикла",e=>e.cycleDay||null]];
+  ["Влажность, %",e=>ev(e,"hum")],["PM2.5, мкг/м³",e=>ev(e,"pm25")],["Kp-индекс",e=>ev(e,"kp")],["Луна, % диска",e=>ev(e,"moonAge",a=>(1-Math.cos(2*Math.PI*a/SYN))/2*100)],["Сон, часов",e=>e.sleep],["Качество сна, 1–5",e=>e.sq||null],["День цикла",e=>e.cycleDay||null],["Базальная темп., °C",e=>e.bbt||null]];
 const has=(e,k,v)=>Array.isArray(e[k])&&e[k].includes(v);
 const PATTERN=[
   ["Резкий перепад давления за сутки (от 4 мм)",e=>ev(e,"dp24",x=>Math.abs(x*HPA2MM)>=4)],
@@ -1242,7 +1374,7 @@ function dayScore(es){
   return s;
 }
 
-/* ---------- History & Interactive Cycle Calendar ---------- */
+/* ---------- History & Flo/Eva Interactive Calendar ---------- */
 function lineChart(a,fa,fb){
   const W=520,H=210,L=40,R=46,T=12,B=26,n=a.length;
   const va=a.map(fa),vb=a.map(fb),xa=va.filter(x=>x!=null),xb=vb.filter(x=>x!=null);
@@ -1254,7 +1386,7 @@ function lineChart(a,fa,fb){
     return `<path d="${d}" fill="none" stroke="${c}" stroke-width="2" ${dash?'stroke-dasharray="4 4"':""} stroke-linejoin="round"/>`};
   let g="";
   for(let k=0;k<=4;k++){const y=T+(H-T-B)*k/4,a1=ahi-(ahi-alo)*k/4,b1=bhi-(bhi-blo)*k/4;
-    g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--accent)">${fmt(a1)}</text>`;
+    g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--accent)">${fmt(a1,Math.abs(ahi-alo)<5?1:0)}</text>`;
     if(xb.length)g+=`<text x="${W-R+6}" y="${y+4}" font-size="11" fill="var(--muted)">${fmt(b1,Math.abs(bhi-blo)<10?1:0)}</text>`}
   g+=`<text x="${X(0)}" y="${H-8}" font-size="11" fill="var(--muted)">${dshort(a[0].ts)}</text><text x="${X(n-1)}" y="${H-8}" font-size="11" fill="var(--muted)" text-anchor="end">${dshort(a[n-1].ts)}</text>`;
   const dots=va.map((x,i)=>x==null?"":`<circle cx="${X(i).toFixed(1)}" cy="${YA(x).toFixed(1)}" r="3" fill="var(--accent)"/>`).join("");
@@ -1287,16 +1419,20 @@ function renderHistory(){
     const s=byDay[k]?dayScore(byDay[k]):null;
     const isPer=pDates.includes(iso);
     const isPred=!isPer&&predSet.has(iso);
-    c+=`<div ${isFem?`data-iso="${iso}"`:""} class="${s||""}${k===tk?" today":""}${isPer?" period":""}${isPred?" pred-period":""}">${d}</div>`;
+    const isOvul=isFem&&ci&&ci.ovulIso===iso;
+    const isFert=isFem&&ci&&ci.fertStartIso&&ci.fertEndIso&&iso>=ci.fertStartIso&&iso<=ci.fertEndIso;
+    c+=`<div ${isFem?`data-iso="${iso}"`:""} class="${s||""}${k===tk?" today":""}${isPer?" period":""}${isPred?" pred-period":""}${isFert?" fertile":""}${isOvul?" ovul":""}">${d}</div>`;
   }
   $("cal").innerHTML=c;
   $("list").innerHTML=!list.length?`<div class="sub">Записей пока нет. Сделайте первую на вкладке «Запись».</div>`:list.slice().reverse().slice(0,60).map(e=>{
     const dt=dstr(e.ts,"dt"),v=e.env||{},m=[],en=[];
     if(e.tod)m.push(e.tod);if(e.pulse)m.push("пульс "+e.pulse);if(e.head)m.push("голова "+e.head+"/10");if(e.mood!=null)m.push("самочувствие "+e.mood+"/10");
     if(e.cycleDay)m.push(e.cycleDay+"-й д. цикла");
+    if(e.flow)m.push("выделения: "+e.flow);
+    if(e.bbt)m.push("БТ "+fmt(e.bbt,2)+"°");
     if(e.sleep)m.push("сон "+fmt(+e.sleep,1)+" ч");if(e.sq)m.push("качество сна "+e.sq+"/5");if(e.water)m.push("вода "+e.water);
     if(e.meds&&e.meds.total)m.push("лекарства "+e.meds.taken.length+" из "+e.meds.total);
-    const tags=[...(e.sym||[]),...(e.hab||[])];if(e.stress===2)tags.push("сильный стресс");
+    const tags=[...(e.sym||[]),...(e.femSym||[]),...(e.hab||[])];if(e.stress===2)tags.push("сильный стресс");
     if(v.p)en.push(fmt(v.p*HPA2MM)+" мм");if(v.dp24!=null)en.push("за сутки "+sign(v.dp24*HPA2MM));if(v.t!=null)en.push(fmt(v.t)+"°");if(v.pm25!=null)en.push("PM2.5 "+fmt(v.pm25));if(v.kp!=null)en.push("Kp "+fmt(v.kp,1));
     return `<div class="entry"><div class="top"><span class="bp">${e.sys&&e.dia?e.sys+"/"+e.dia:"без давления"}</span><span class="meta">${dt}</span></div>
       <div class="meta">${m.join(" · ")}</div>${tags.length?`<div class="meta">${esc(tags.join(", "))}</div>`:""}${en.length?`<div class="meta">Среда: ${en.join(" · ")}</div>`:""}${e.note?`<div class="nt">${esc(e.note)}</div>`:""}
@@ -1436,7 +1572,7 @@ function buildContextForAi(days=28){
   const lines=[`Профиль: ${p.rawName||p.name}, пол: ${sexStr}, город: ${p.city.name}. Период анализа: ${periodLabel}.`];
   if(p.sex==="f"){
     const ci=getCycleInfo(p);
-    lines.push(`Женский цикл: средняя длина ${ci.len} дн., текущий день: ${ci.day||"не задан"} (${ci.phase}), прогноз следующего начала: ${ci.nextIso||"не рассчитан"}. Отмечено циклов в истории: ${ci.hist.starts.length}.`);
+    lines.push(`Женский цикл (режим: ${p.cycleGoal==="conceive"?"планирование беременности":"трекинг здоровья"}): средняя длина ${ci.len} дн., длительность мес. ${ci.hist.avgDuration} дн., регулярность: ${ci.hist.regularity}, текущий день: ${ci.day||"не задан"} (${ci.phase}), расчётная овуляция: ${ci.ovulIso||"—"} (${ci.ovulDay||"—"}-й день), шанс зачатия: ${ci.chance}, прогноз след. мес.: ${ci.nextIso||"—"}.`);
   }
   if(env){
     const d=derived();
@@ -1465,8 +1601,11 @@ function buildContextForAi(days=28){
       if(e.mood!=null)parts.push(`самочувствие ${e.mood}/10`);
       if(e.head)parts.push(`головная боль ${e.head}/10`);
       if(e.cycleDay)parts.push(`день цикла ${e.cycleDay}${e.cyclePhase?" ("+e.cyclePhase+")":""}`);
+      if(e.flow)parts.push(`выделения: ${e.flow}`);
+      if(e.bbt)parts.push(`БТ ${e.bbt}°C`);
       if(e.sleep)parts.push(`сон ${e.sleep}ч`+(e.sq?` (качество ${e.sq}/5)`:""));
-      if(e.sym&&e.sym.length)parts.push(`симптомы: ${e.sym.join(",")}`);
+      const allS=[...(e.sym||[]),...(e.femSym||[])];
+      if(allS.length)parts.push(`симптомы: ${allS.join(",")}`);
       if(e.hab&&e.hab.length)parts.push(`факторы: ${e.hab.join(",")}`);
       if(e.meds&&e.meds.total)parts.push(`лекарства ${e.meds.taken.length}/${e.meds.total}`);
       const envP=[];
@@ -1573,7 +1712,7 @@ $("aiRun").addEventListener("click",async()=>{
   out.textContent="Формирую подробный отчёт ИИ…";
   try{
     const summary=buildContextForAi(aiDays);
-    const prompt=`Составь подробный структурированный отчёт и практические рекомендации по дневнику:\n${summary}\n\nВключи:\n1. Сводку показателей (давление, пульс, сон, самочувствие) за выбранный период.\n2. Как погода, цикл и режим влияли на состояние (закономерности).\n3. Практические шаги на ближайшие дни с учётом назначений врача, чтобы самочувствие было стабильным.\n4. 3–4 конкретных вопроса для врача.`;
+    const prompt=`Составь подробный структурированный отчёт и практические рекомендации по дневнику:\n${summary}\n\nВключи:\n1. Сводку показателей (давление, пульс, сон, цикл/БТ, самочувствие) за выбранный период.\n2. Как погода, фаза цикла и режим влияли на состояние (закономерности).\n3. Практические шаги на ближайшие дни с учётом назначений врача, чтобы самочувствие было стабильным.\n4. 3–4 конкретных вопроса для врача.`;
     const {data,error}=await sb.functions.invoke("ai-analyze",{body:{summary:prompt,lang:LANG}});
     if(error)throw error;
     if(data&&data.error)throw new Error(data.error);
@@ -1601,11 +1740,12 @@ $("aiCopyRespBtn").addEventListener("click",()=>{
 });
 
 /* ---------- Entry form ---------- */
-const chip=(name,v,nt)=>`<label class="chip"><input type="checkbox" name="${name}" value="${esc(v)}"><span${nt?' class="nt"':""}>${esc(v)}</span></label>`;
+const chip=(name,v,nt,cls="")=>`<label class="chip ${cls}"><input type="checkbox" name="${name}" value="${esc(v)}"><span${nt?' class="nt"':""}>${esc(v)}</span></label>`;
 const picked=name=>[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);
 function renderForm(){
   const h=new Date().getHours();$("tod").value=h<12?"утро":h<18?"день":"вечер";
   $("symBox").innerHTML=SYM.map(s=>chip("sym",s)).join("");
+  $("femSymBox").innerHTML=FEM_SYM.map(s=>chip("femsym",s,false,"rose")).join("");
   $("habBox").innerHTML=HAB.map(s=>chip("hab",s)).join("");
   const m=prof().meds;
   $("medBox").innerHTML=m.length?m.map(x=>chip("med",x.name+" ("+x.time+")",true)).join(""):`<span class="sub">Список лекарств пуст. Добавьте их в настройках (шестерёнка сверху).</span>`;
@@ -1616,6 +1756,17 @@ function addEntry(e){
   if(p.sex==="f"){
     const ci=getCycleInfo(p,e.ts);
     if(ci&&ci.day){e.cycleDay=ci.day;e.cyclePhase=ci.phase}
+    if(e.flow){
+      const todayIso=isoDate(e.ts);
+      if(!Array.isArray(p.periodDates))p.periodDates=[];
+      if(!p.periodDates.includes(todayIso)){
+        p.periodDates.push(todayIso);
+        p.periodDates.sort();
+        const hist=analyzeCycleHistory(p);
+        if(hist.starts.length)p.lastPeriod=hist.starts[hist.starts.length-1];
+        saveS();pushProfileUpdate(p);renderCycleWidgets();
+      }
+    }
   }
   ALL.push(e);
   const ok=saveE();renderHistory();renderReports();renderSmartCare();
@@ -1633,10 +1784,12 @@ $("f").addEventListener("submit",ev=>{
   if(s2!=null){sys=Math.round((sys+s2)/2);dia=Math.round((dia+d2)/2)}
   const total=prof().meds.length,simple=S.simple!==false,h=new Date().getHours(),bed=$("bed").value,wake=$("wake").value,sl={sq:num("sq")};
   if(bed&&wake){const mn=t=>+t.slice(0,2)*60+ +t.slice(3,5);sl.bed=bed;sl.wake=wake;sl.sleep=Math.round(((mn(wake)-mn(bed)+1440)%1440)/6)/10}
-  $("saved").textContent=addEntry(Object.assign(sl,simple?{tod:h<12?"утро":h<18?"день":"вечер",sys,dia,pulse:num("pulse"),mood:+$("mood").value,meds:{taken:picked("med"),total}}:
+  const femExtra=prof().sex==="f"?{flow:$("flowSel").value||null,bbt:num("bbtInp"),femSym:picked("femsym")}:{};
+  $("saved").textContent=addEntry(Object.assign(sl,femExtra,simple?{tod:h<12?"утро":h<18?"день":"вечер",sys,dia,pulse:num("pulse"),mood:+$("mood").value,meds:{taken:picked("med"),total}}:
     {tod:$("tod").value,sys,dia,pulse:num("pulse"),head:+$("head").value,mood:+$("mood").value,water:num("water"),stress:+$("stress").value,
     sym:picked("sym"),hab:picked("hab"),meds:{taken:picked("med"),total},note:$("note").value.trim()}));
-  ["sys","dia","sys2","dia2","pulse","bed","wake","sq","water","note"].forEach(id=>$(id).value="");$("head").value=0;$("mood").value=5;$("headV").textContent="0";$("moodV").textContent="5";$("stress").value="0";
+  ["sys","dia","sys2","dia2","pulse","bed","wake","sq","water","note","bbtInp"].forEach(id=>$(id).value="");
+  $("flowSel").value="";$("head").value=0;$("mood").value=5;$("headV").textContent="0";$("moodV").textContent="5";$("stress").value="0";
   renderForm();
 });
 $("list").addEventListener("click",ev=>{const t=ev.target.dataset.del;if(!t)return;const pid=prof().id;ALL=ALL.filter(e=>!(String(e.pid)===String(pid)&&String(e.ts)===t));saveE();deleteEntryCloud(pid,Number(t));renderHistory();renderReports();renderSmartCare()});
@@ -1776,10 +1929,13 @@ function renderSettings(){
   $("remCycleConsentBox").classList.toggle("hide",!isFem);
   if(isFem){
     const ci=getCycleInfo(p);
+    $("cycleGoal").value=p.cycleGoal||"track";
     $("cycLen").value=ci.len||28;
+    $("cycDur").value=p.periodDur||5;
+    $("cycLut").value=p.lutealLen||14;
     $("cycLast").value=p.lastPeriod||"";
     $("cycAnalysisInfo").innerHTML=ci.nextIso
-      ?`Расчётная дата следующих месячных: <b>${dstr(Date.parse(ci.nextIso+"T12:00:00"),"short")}</b> (через ${Math.max(0,ci.nextIn)} дн.).`
+      ?`Следующие месячные: <b>${dstr(Date.parse(ci.nextIso+"T12:00:00"),"short")}</b> · овуляция: <b>${dstr(Date.parse(ci.ovulIso+"T12:00:00"),"short")}</b>.`
       :"Укажите дату или отметьте дни в календаре, чтобы рассчитать прогноз.";
   }
   $("cityList").innerHTML=(CITIES.some(c=>c[0]===p.city.name)?"":`<option value="-1" selected>${esc(p.city.name)}</option>`)+CITIES.map((c,i)=>`<option value="${i}"${c[0]===p.city.name?" selected":""}>${c[0]}</option>`).join("");
@@ -1812,9 +1968,21 @@ $("profEditSex").addEventListener("change",()=>{
   const p=prof();p.sex=$("profEditSex").value;
   saveS();pushProfileUpdate(p);renderSettings();renderCycleWidgets();renderSmartCare();renderHistory();renderReports();renderAiView();
 });
+$("cycleGoal").addEventListener("change",()=>{
+  const p=prof();p.cycleGoal=$("cycleGoal").value;
+  saveS();pushProfileUpdate(p);renderCycleWidgets();renderReports();renderAiView();
+});
 $("cycLen").addEventListener("change",()=>{
   const p=prof();p.cycleLen=Math.max(20,Math.min(45,Number($("cycLen").value)||28));
   saveS();pushProfileUpdate(p);renderSettings();renderCycleWidgets();renderSmartCare();renderHistory();renderReports();renderAiView();
+});
+$("cycDur").addEventListener("change",()=>{
+  const p=prof();p.periodDur=Math.max(2,Math.min(10,Number($("cycDur").value)||5));
+  saveS();pushProfileUpdate(p);renderSettings();renderCycleWidgets();renderHistory();renderReports();
+});
+$("cycLut").addEventListener("change",()=>{
+  const p=prof();p.lutealLen=Math.max(10,Math.min(17,Number($("cycLut").value)||14));
+  saveS();pushProfileUpdate(p);renderSettings();renderCycleWidgets();renderHistory();renderReports();
 });
 $("cycLast").addEventListener("change",()=>{
   const p=prof(),v=$("cycLast").value;
@@ -1829,16 +1997,16 @@ $("profAdd").addEventListener("click",async()=>{
   const n=$("profNew").value.trim();if(!n)return;
   const sex=$("profNewSex").value;
   const city=Object.assign({},prof().city);
-  const meta=packMeta({city,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[]});
+  const meta=packMeta({city,sex,cycleGoal:"track",cycleLen:28,periodDur:5,lutealLen:14,lastPeriod:null,periodDates:[],rxNotes:[]});
   if(sb&&sbUser){
     const {data:ins,error}=await sb.from("mt_profiles").insert({owner_id:sbUser.id,name:n,city:meta,meds:[]}).select().single();
     if(!error&&ins){
-      S.profiles.push({id:ins.id,owner_id:ins.owner_id,name:ins.name,rawName:ins.name,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});
+      S.profiles.push({id:ins.id,owner_id:ins.owner_id,name:ins.name,rawName:ins.name,sex,cycleGoal:"track",cycleLen:28,periodDur:5,lutealLen:14,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});
       S.cur=ins.id;$("profNew").value="";switched();return;
     }
   }
   const id=Date.now();
-  S.profiles.push({id,name:n,sex,cycleLen:28,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});S.cur=id;$("profNew").value="";switched();
+  S.profiles.push({id,name:n,sex,cycleGoal:"track",cycleLen:28,periodDur:5,lutealLen:14,lastPeriod:null,periodDates:[],rxNotes:[],city,meds:[]});S.cur=id;$("profNew").value="";switched();
 });
 $("cityList").addEventListener("change",()=>{const c=CITIES[$("cityList").value];if(!c)return;prof().city={name:c[0],lat:c[1],lon:c[2]};saveS();pushProfileUpdate(prof());load()});
 $("citySearch").addEventListener("click",async()=>{
@@ -1856,9 +2024,9 @@ $("simpleBtn").addEventListener("click",()=>{S.simple=S.simple===false;saveS();a
 $("big").addEventListener("change",()=>{S.big=$("big").checked;saveS();applyLook()});
 $("theme").addEventListener("change",()=>{S.theme=$("theme").value;saveS();if(S.theme==="auto")delete document.documentElement.dataset.theme;applyLook()});
 $("csvBtn").addEventListener("click",()=>{
-  const head="человек;дата;время;верхнее;нижнее;пульс;головная боль;самочувствие;сон;вода;стресс;симптомы;привычки;лекарства принято;лекарств всего;день цикла;заметка;температура;атм. давление гПа;изменение 24ч;изменение 3ч;влажность;ветер;порывы;облачность;осадки;PM2.5;PM10;NO2;O3;SO2;Kp;возраст Луны;отбой;подъём;качество сна";
+  const head="человек;дата;время;верхнее;нижнее;пульс;головная боль;самочувствие;сон;вода;стресс;симптомы;привычки;лекарства принято;лекарств всего;день цикла;выделения;базальная темп;заметка;температура;атм. давление гПа;изменение 24ч;изменение 3ч;влажность;ветер;порывы;облачность;осадки;PM2.5;PM10;NO2;O3;SO2;Kp;возраст Луны;отбой;подъём;качество сна";
   const nm=id=>(S.profiles.find(p=>String(p.id)===String(id))||{name:""}).name, cl=s=>String(s||"").replace(/;/g,",");
-  const rows=ALL.map(e=>{const v=e.env||{};return [cl(nm(e.pid)),new Date(e.ts).toISOString(),e.tod,e.sys,e.dia,e.pulse,e.head,e.mood,e.sleep,e.water,e.stress,cl((e.sym||[]).join(", ")),cl((e.hab||[]).join(", ")),e.meds?e.meds.taken.length:"",e.meds?e.meds.total:"",e.cycleDay||"",cl(e.note),v.t,v.p,v.dp24,v.dp3,v.hum,v.wind,v.gust,v.cloud,v.precip,v.pm25,v.pm10,v.no2,v.o3,v.so2,v.kp,v.moonAge,e.bed,e.wake,e.sq].map(x=>x==null?"":x).join(";")});
+  const rows=ALL.map(e=>{const v=e.env||{};return [cl(nm(e.pid)),new Date(e.ts).toISOString(),e.tod,e.sys,e.dia,e.pulse,e.head,e.mood,e.sleep,e.water,e.stress,cl([...(e.sym||[]),...(e.femSym||[])].join(", ")),cl((e.hab||[]).join(", ")),e.meds?e.meds.taken.length:"",e.meds?e.meds.total:"",e.cycleDay||"",e.flow||"",e.bbt||"",cl(e.note),v.t,v.p,v.dp24,v.dp3,v.hum,v.wind,v.gust,v.cloud,v.precip,v.pm25,v.pm10,v.no2,v.o3,v.so2,v.kp,v.moonAge,e.bed,e.wake,e.sq].map(x=>x==null?"":x).join(";")});
   copyOut([head,...rows].join("\n"),$("csv"),$("csvBtn"));
 });
 
